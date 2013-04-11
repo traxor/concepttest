@@ -1,2 +1,18 @@
 body {
+    font-family:Verdana;
+    font-size: 12px;
+    margin-left:50px;
+    margin-top:50px;
+}
+div {
+    border: 1px solid black;
+    width:50%;
+    margin:1.2em;
+    padding:1em;
+}
+span.bright {
+    color:red;
+}
+.red {
+    color: red;
 }

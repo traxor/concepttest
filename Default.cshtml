@@ -1,5 +1,9 @@
 ﻿@{
+    var pageTitle = "See the questions!";
+
+    var db = Database.Open("102547-concepttest");
     
+    //var grid = new WebGrid(source: selectedData, defaultSort: "course_id", rowsPerPage: 3);
 }
 
 <!DOCTYPE html>
@@ -7,10 +11,46 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>My Site's Title</title>
+        <link rel="stylesheet" type="text/css" href="StyleSheet.css">
+        <title>@pageTitle</title>
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     </head>
     <body>
-        
+        <div>
+            @{
+                if(Request.QueryString["course"] != null) {
+                    var selectedData = db.QuerySingle("SELECT * FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
+                    var selectedLecture = db.Query("SELECT * FROM T_Lecture WHERE course_id = @0", selectedData.id);
+                    var grid = new WebGrid(source: selectedLecture, defaultSort: "id", rowsPerPage: 3);
+                    <h2>@selectedData.course_id @selectedData.course_name</h2>
+                    <p>Lectures:</p>
+                    if(selectedLecture.Count < 1) {
+                        <p><i>No lectures for selected course...</i></p>
+                    }
+                    else {
+                        foreach(var lecture in selectedLecture) {
+                            <p><a href="?lecture=@lecture.id">@lecture.date</a></p>
+                        }
+                    }
+                }
+                else if(Request.QueryString["lecture"] != null) {
+                    var selectedQuestion = db.Query("SELECT * FROM T_Question WHERE lecture_id = @0", Request.QueryString["lecture"]);
+                    foreach(var question in selectedQuestion) {
+                        var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", question.id);
+                        <p><b>@question.question</b></p>
+                        foreach(var answer in selectedAnswers) {
+                            <p>@answer.answer</p>
+                        }
+                    }
+                }
+                else {
+                    var selectedData = db.Query("SELECT * FROM T_Course");
+                    <h1>Select a course</h1>
+                    foreach(var course in selectedData) {
+                        <p><a href="?course=@course.course_id">@course.course_id @course.course_name</a></p>
+                    }
+                }
+            }
+        </div>
     </body>
 </html>
