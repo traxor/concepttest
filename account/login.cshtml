@@ -1,16 +1,26 @@
 ﻿@{
-    var db = Database.Open("102547-concepttest");
-    var usernameInput = Request.Form["username"];
-    var passwordInput = Request.Form["password"];
-    var success = "";
-
-    if(IsPost) {
-        var checkInput = db.QueryValue("SELECT COUNT(*) FROM T_User WHERE username = @0 AND password = @1", usernameInput, passwordInput);
+    var pageTitle = "Login";   
+    var usernameInput = "";
+    var passwordInput = "";
+    var errorMessage = "";
+    var redirect = "~/adduser.cshtml";
+        
+    Validation.RequireField("username", "You must enter a username!");
+    Validation.RequireField("password", "You must enter a password!"); 
+    
+    if(IsPost && Validation.IsValid()) {
+        usernameInput = Request.Form["username"];
+        passwordInput = Request.Form["password"];
+        var db = Database.Open("102547-concepttest");
+        string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
+        var checkInput = db.QueryValue("SELECT COUNT(*) FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
         if(checkInput != 0) {
-            success = "Success";
+            int userId = db.QueryValue("SELECT id FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
+            Session["id"] = userId;
+            Response.Redirect(redirect);
         }
         else {
-            success = "Invalid username/password";
+            errorMessage = "Invalid username/password";
         }
     }
        
@@ -21,20 +31,20 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>Login Page</title>
+        <title>@pageTitle</title>
     </head>
     <body>
         <form method="post">
             <div>
-                <label for="Username">Username:</label>
+                <label for="Username" >Username:</label>
                 <input type="text" name="username" value="" />
                 <br/>
-                <label for="Password">Password</label>
+                <label for="Password">Password:</label>
                 <input type="password" name="password" value="" />
                 <br/>
                 <input type="Submit" value="Login" />
             </div>
         </form>
-        @success
+        @errorMessage
     </body>
 </html>

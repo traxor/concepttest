@@ -1,31 +1,60 @@
 ﻿@{
+    var redirect = "~/Account/login.cshtml";
     var pageTitle = "Add user";
-
-    Validation.RequireField("username", "You must enter a username!");
-    Validation.RequireField("password", "You must enter a password!");
-    Validation.RequireField("name", "You must enter a name!");
 
     var usernameInput = "";
     var passwordInput = "";
     var nameInput = "";
     var successMessage = "";
+    var errorMessage =  "";
+    bool isValidUsername =  false;
 
-    if(IsPost && Validation.IsValid()) {
-        usernameInput = Request.Form["username"];
-        passwordInput = Request.Form["password"];
-        nameInput = Request.Form["name"];
-
-        string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
-
+    if (Session["id"] != null) {
+        int userId = (int)(Session["id"]);
         var db = Database.Open("102547-concepttest");
-        var insertCommand = "INSERT INTO T_User (username, password, name) VALUES(@0, @1, @2)";
-        db.Execute(insertCommand, usernameInput, pwhash, nameInput);
-        successMessage = "Successfully added " + usernameInput + " to database!";
+        var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", userId);
+        if (checkIfAdmin != 0) {
+
+
+            Validation.RequireField("username", "You must enter a username!");
+            Validation.RequireField("password", "You must enter a password!");
+            Validation.RequireField("name", "You must enter a name!");
+
+
+
+            if(IsPost && Validation.IsValid()) {
+                usernameInput = Request.Form["username"];
+                passwordInput = Request.Form["password"];
+                nameInput = Request.Form["name"];
+                if (db.QueryValue("SELECT count(*) FROM T_User WHERE username = @0", usernameInput) == 0) {
+                    string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
+
+                    //var db = Database.Open("102547-concepttest");
+                    var insertCommand = "INSERT INTO T_User (username, password, name) VALUES(@0, @1, @2)";
+                    db.Execute(insertCommand, usernameInput, pwhash, nameInput);
+                    successMessage = "Successfully added " + usernameInput + " to database!";
+                    isValidUsername = true;
+                }
+                else {
+                    errorMessage = "Username already exist, please try another username.";
+                }
+
+
+            }
+    
+    
+            //var selectedData = db.Query("SELECT * FROM [User] WHERE username = @0", usernameInput);
+            //var grid = new WebGrid(source: selectedData);
+        }
+        else {
+            Response.Redirect(redirect);
+        }
+
+    }
+    else {
+        Response.Redirect(redirect);
     }
     
-    
-    //var selectedData = db.Query("SELECT * FROM [User] WHERE username = @0", usernameInput);
-    //var grid = new WebGrid(source: selectedData);
 
 }
 
@@ -41,7 +70,7 @@
     </head>
     <body>
         @{
-            if(IsPost && Validation.IsValid()) {
+            if(IsPost && Validation.IsValid() && isValidUsername) {
                 <div>
                     <p>username: @usernameInput</p>
                     <p>password: @passwordInput</p>
@@ -52,14 +81,15 @@
             }
             else {
                 <form method="post">
-                    <div class="bord">
+                    <div>
                         <h1>Add user</h1>
-                        <p>Username: <input type="text" name="username" maxlength="30"> @Html.ValidationMessage("username")</p>
+                        <p>Username: <input type="text" name="username" maxlength="30"> @Html.ValidationMessage("username") @errorMessage</p> 
                         <p>Password: <input type="password" name="password" maxlength="30"> @Html.ValidationMessage("password")</p>
                         <p>Name: <input type="text" name="name" maxlength="30"> @Html.ValidationMessage("name")</p>
                         <p><input type="submit" value="Add user"></p>
                     </div>
                 </form>
+
             }
         }
         
