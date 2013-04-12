@@ -1,0 +1,77 @@
+﻿@{
+    System.Web.UI.WebControls.DropDownList ddl = new System.Web.UI.WebControls.DropDownList();
+    
+
+
+    //Page.Title = "Add Question";
+    var Question = "";
+    var Tags = "";
+    var course="";
+    var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0";
+    var addcommand = "INSERT INTO T_Question (question, tags) Values (@0, @1)";
+    var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
+
+    var db = Database.Open("102547-concepttest");
+    var selected = db.Query("SELECT * FROM T_Course");
+    
+    if(IsPost)
+    {
+        Validation.RequireField("Question", "You must submit a question");
+        Validation.RequireField("Tags", "Tags required");
+        var lectureId = Request.Form["lectures"];
+
+        if(Validation.IsValid()){
+            Question = Request.Form["Question"];
+            Tags = Request.Form["Tags"];
+            db.Execute("START TRANSACTION");
+                db.Execute(addcommand, Question, Tags);
+                var id = db.GetLastInsertId();
+                db.Execute(addrelation, id, lectureId);
+            db.Execute("COMMIT");
+        }
+    }  
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Add Question</title>
+    </head>
+    <body>
+        <form method="post">
+
+            <select id="categoryId" name="categoryId">
+                <option value="">-- Select course --</option>
+
+                @foreach(var category in selected){
+                        <option value="@category.id">@category.course_name</option>
+                }
+            </select>
+            
+            @{
+                course = Request.Form["categoryId"];
+                var selectedlectures = db.Query(selectcommand, course); 
+            }
+
+            <select id="lectures" name="lectures">
+                <option value="">-- Select lecture --</option>
+                @foreach(var matchinglectures in selectedlectures){
+                    <option value="@matchinglectures.id">@matchinglectures.date</option>
+                }
+            </select>
+
+            <br/>
+            Question:
+            <input type="text" name="Question" value="" style="margin-left: 25px" />
+            @Html.ValidationMessage("Question")
+            <br/>
+            Tags:
+            <input type="text" name="Tags" value="" style="margin-left: 51px" />
+            @Html.ValidationMessage("Tags")
+            <br/>
+            <input type="submit" name="submit" value="submit" />
+        </form>
+    </body>
+</html>
