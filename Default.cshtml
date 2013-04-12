@@ -18,10 +18,11 @@
     </head>
     <body>
         <div>
+            <a href="account/login.cshtml">Log in</a>
             @{
                 if(Request.QueryString["course"] != null) {
-                    var selectedData = db.QuerySingle("SELECT * FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
-                    var selectedLecture = db.Query("SELECT * FROM T_Lecture WHERE course_id = @0", selectedData.id);
+                    var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
+                    var selectedLecture = db.Query("SELECT id, date FROM T_Lecture WHERE course_id = @0", selectedData.id);
                     var grid = new WebGrid(source: selectedLecture, defaultSort: "id", rowsPerPage: 3);
                     <h2>@selectedData.course_id @selectedData.course_name</h2>
                     <p>Lectures:</p>
@@ -37,7 +38,7 @@
                 else if(Request.QueryString["lecture"] != null) {
                     var passwordMessage = "";
                     if(IsPost) {
-                        var selectedLecture = db.QuerySingle("SELECT * FROM T_Lecture WHERE id = @0", Request.QueryString["lecture"]);
+                        var selectedLecture = db.QuerySingle("SELECT password FROM T_Lecture WHERE id = @0", Request.QueryString["lecture"]);
                         if(Request.Form["password"] == selectedLecture.password) {
                             HttpCookie studentCookie = new HttpCookie("studentCookie");
                             studentCookie.Value = Request.QueryString["lecture"];
@@ -64,10 +65,13 @@
                     }
                     
                     if(lecturename == Request.QueryString["lecture"]) {
-                        var selectedQuestion = db.Query("SELECT * FROM T_Question WHERE lecture_id = @0", Request.QueryString["lecture"]);
+                        var selectQuestionId = db.Query("SELECT question_id FROM T_Question_Lecture WHERE lecture_id = @0", Request.QueryString["lecture"]);
+                        var selectQuestionCount = db.QueryValue("SELECT COUNT(*) FROM T_Question_Lecture WHERE lecture_id = @0", Request.QueryString["lecture"]);
+                        var selectedQuestion = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
                         <form method="post">
                         @foreach(var question in selectedQuestion) {
-                            var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", question.id);
+                            <div>
+                            @{var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", question.id);
                             var selectedAnswersRight = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE question_id = @0 AND correct = 1", question.id);
                             <p><b>@question.question</b></p>
                             
@@ -89,14 +93,15 @@
                                     db.Execute(insertCommand, @question.id, Request.Form[@question.id], Request.QueryString["lecture"]);
                                     
                                 }
-                            }
+                            }}
+                            </div>
                         }
                         <input type="submit" value="Answer">
                         </form>
                     }
                 }
                 else {
-                    var selectedData = db.Query("SELECT * FROM T_Course");
+                    var selectedData = db.Query("SELECT course_id, course_name FROM T_Course");
                     <h1>Select a course</h1>
                     foreach(var course in selectedData) {
                         <p><a href="?course=@course.course_id">@course.course_id @course.course_name</a></p>
