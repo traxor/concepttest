@@ -37,41 +37,54 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <link rel="stylesheet" type="text/css" href="StyleSheet.css">
         <title>Add Question</title>
     </head>
     <body>
         <form method="post">
 
-            <select id="categoryId" name="categoryId">
-                <option value="">-- Select course --</option>
+            <div>
 
-                @foreach(var category in selected){
-                        <option value="@category.id">@category.course_name</option>
-                }
-            </select>
+                <h1>Add question</h1>
+
+                <hr>
+
+
+                <select id="categoryId" name="categoryId">
+                    <option value="">-- Select course --</option>
+
+                    @foreach(var category in selected){
+                            <option value="@category.id">@category.course_name</option>
+                    }
+                </select>
             
-            @{
-                course = Request.Form["categoryId"];
-                var selectedlectures = db.Query(selectcommand, course); 
-            }
-
-            <select id="lectures" name="lectures">
-                <option value="">-- Select lecture --</option>
-                @foreach(var matchinglectures in selectedlectures){
-                    <option value="@matchinglectures.id">@matchinglectures.date</option>
+                @{
+                    course = Request.Form["categoryId"];
+                    var selectedlectures = db.Query(selectcommand, course); 
                 }
-            </select>
 
-            <br/>
-            Question:
-            <input type="text" name="Question" value="" style="margin-left: 25px" />
-            @Html.ValidationMessage("Question")
-            <br/>
-            Tags:
-            <input type="text" name="Tags" value="" style="margin-left: 51px" />
-            @Html.ValidationMessage("Tags")
-            <br/>
-            <input type="submit" name="submit" value="submit" />
+                <select id="lectures" name="lectures">
+                    <option value="">-- Select lecture --</option>
+                    @foreach(var matchinglectures in selectedlectures){
+                        <option value="@matchinglectures.id">@matchinglectures.date</option>
+                    }
+                </select>
+
+                <br/>
+                Question:
+                <input type="text" name="Question" value="" style="margin-left: 25px" />
+                @Html.ValidationMessage("Question")
+                <br/>
+                Tags:
+                <input type="text" name="Tags" value="" style="margin-left: 51px" />
+                @Html.ValidationMessage("Tags")
+                <br/>
+                <input type="submit" name="submit" value="submit" />
+
+                <p><a href="dashboard.cshtml">Back to dashboard</a></p>
+
+            </div>
+
         </form>
     </body>
 </html>

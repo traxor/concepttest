@@ -18,7 +18,7 @@
     </head>
     <body>
         <div>
-            <a href="account/login.cshtml">Log in</a>
+            <a href="login.cshtml">Log in</a>
             @{
                 if(Request.QueryString["course"] != null) {
                     var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
@@ -42,7 +42,7 @@
                         if(Request.Form["password"] == selectedLecture.password) {
                             HttpCookie studentCookie = new HttpCookie("studentCookie");
                             studentCookie.Value = Request.QueryString["lecture"];
-                            studentCookie.Expires = DateTime.Now.AddSeconds(30);
+                            studentCookie.Expires = DateTime.Now.AddMinutes(5);
                             Response.Cookies.Add(studentCookie);
                             passwordMessage = "";
                             var address = "?lecture=" + Request.QueryString["lecture"];
@@ -73,27 +73,38 @@
                             <div>
                             @{var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", question.id);
                             var selectedAnswersRight = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE question_id = @0 AND correct = 1", question.id);
-                            <p><b>@question.question</b></p>
+                            <p><b>@question.question</b> @selectedAnswersRight / @selectedAnswers.Count Question ID: @question.id</p>
                             
-                            if(selectedAnswersRight < 2) {
+                            if(selectedAnswersRight == 1) {
                                 foreach(var answer in selectedAnswers) {
-                                    <p><input type="radio" name="@question.id" value="@answer.id"> @answer.answer</p>
+                                    <p><input type="radio" name="@question.id" value="@answer.id"> ID: @answer.id @answer.answer</p>
                                 }
                                 if(IsPost) {
-                                    var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
-                                    db.Execute(insertCommand, @question.id, Request.Form[@question.id], Request.QueryString["lecture"]);
+                                    try {
+                                        //var answer = Request.Form[@question.id];
+                                        <p>You selected answer: @Request.Form[@question.id] for question @question.id</p>
+                                        //var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
+                                        //db.Execute(insertCommand, @question.id, answer, Request.QueryString["lecture"]);
+                                    }
+                                    catch (Exception e) {
+                                        Response.Write("Exception occured: " + e + "<br/>");
+                                    }
+                                    finally {
+                                        Response.Write("Answer added!<br/>");
+                                    }
+                                    
                                 }
                             }
-                            else {
+                            /*else {
                                 foreach(var answer in selectedAnswers) {
                                     <p><input type="checkbox" name="@question.id" value="@answer.id"> @answer.answer</p>
                                 }
-                                if(IsPost) {
+                                /*if(IsPost) {
                                     var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
                                     db.Execute(insertCommand, @question.id, Request.Form[@question.id], Request.QueryString["lecture"]);
                                     
                                 }
-                            }}
+                            }*/}
                             </div>
                         }
                         <input type="submit" value="Answer">

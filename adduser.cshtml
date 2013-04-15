@@ -83,10 +83,12 @@
                 <form method="post">
                     <div>
                         <h1>Add user</h1>
+                        <hr>
                         <p>Username: <input type="text" name="username" maxlength="30"> @Html.ValidationMessage("username") @errorMessage</p> 
                         <p>Password: <input type="password" name="password" maxlength="30"> @Html.ValidationMessage("password")</p>
                         <p>Name: <input type="text" name="name" maxlength="30"> @Html.ValidationMessage("name")</p>
                         <p><input type="submit" value="Add user"></p>
+                        <p><a href="dashboard.cshtml">Back to dashboard</a></p>
                     </div>
                 </form>
 
