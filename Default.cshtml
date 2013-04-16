@@ -18,7 +18,7 @@
     </head>
     <body>
         <div>
-            <a href="login.cshtml">Log in</a>
+            
             @{
                 if(Request.QueryString["course"] != null) {
                     var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
@@ -34,6 +34,8 @@
                             <p><a href="?lecture=@lecture.id">@lecture.date</a></p>
                         }
                     }
+                    <hr>
+                    <p><a href="~/">Back to front page</a></p>
                 }
                 else if(Request.QueryString["lecture"] != null) {
                     var passwordMessage = "";
@@ -68,7 +70,24 @@
                         var selectQuestionId = db.Query("SELECT question_id FROM T_Question_Lecture WHERE lecture_id = @0", Request.QueryString["lecture"]);
                         var selectQuestionCount = db.QueryValue("SELECT COUNT(*) FROM T_Question_Lecture WHERE lecture_id = @0", Request.QueryString["lecture"]);
                         var selectedQuestion = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
+                        var hasAnsweredAllQuestions = "";
                         <form method="post">
+
+                        @{
+                        
+                            if(IsPost) {
+                                hasAnsweredAllQuestions = "1";
+                                foreach(var question in selectedQuestion) {
+                                    if(Request.Form["question-" + question.id] == null) {
+                                        hasAnsweredAllQuestions = "0";
+                                    }
+                                }
+                            }
+                        
+
+                        if(hasAnsweredAllQuestions == "0") {
+                            <h2>SVARA PÅ ALLA FRÅGOR!</h2>
+                        } }
                         @foreach(var question in selectedQuestion) {
                             <div>
                             @{var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", question.id);
@@ -80,7 +99,7 @@
                                     <p><input type="radio" name="question-@question.id" value="@answer.id"> @answer.answer</p>
                                 }
                                 
-                                if(IsPost) {
+                                if(IsPost && hasAnsweredAllQuestions == "1") {
                                     try {
                                         var answer = Request.Form["question-" + question.id];
                                         <p>For question @question.id you answered: @answer</p>
@@ -90,9 +109,6 @@
                                     catch (Exception e) {
                                         <p>Exception occured: @e</p>
                                     }
-                                    finally {
-                                        <p>Answer added!</p>
-                                    }
                                     
                                 }
                             }
@@ -100,23 +116,24 @@
                                 foreach(var answer in selectedAnswers) {
                                     <p><input type="checkbox" name="question-@question.id" value="@answer.id"> @answer.answer</p>
                                 }
-                                if(IsPost) {
+                                if(IsPost && hasAnsweredAllQuestions == "1") {
                                     var answer = Request.Form["question-" + question.id];
-                                    string[] answers = answer.Split(',');
-                                    <p>For question @question.id you answered: @answer</p>
-                                    foreach(string word in answers) {
-                                        try {
-                                            //<p>@word</p>
-                                            var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
-                                            db.Execute(insertCommand, @question.id, word, Request.QueryString["lecture"]);
-                                        }
-                                        catch (Exception e) {
-                                            <p>Exception occured: @e</p>
-                                        }
-                                        finally {
-                                            <p>Answer added!</p>
+                                    if(answer != null) {
+                                        string[] answers = answer.Split(',');
+                                        <p>For question @question.id you answered: @answer</p>
+                                        foreach(string word in answers) {
+                                            try {
+                                                //<p>@word</p>
+                                                var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
+                                                db.Execute(insertCommand, @question.id, word, Request.QueryString["lecture"]);
+                                            }
+                                            catch (Exception e) {
+                                                <p>Exception occured: @e</p>
+                                            }
                                         }
                                     }
+                                    
+                                    
                                 }
                             }}
                             </div>
@@ -125,6 +142,10 @@
                             
                         </form>
                     }
+                    <hr>
+                    var getCourseID = db.QueryValue("SELECT T_Course.course_id FROM T_Course, T_Lecture WHERE T_Course.id = T_Lecture.course_id AND T_Lecture.id = @0", Request.QueryString["lecture"]);
+                    <p><a href="?course=@getCourseID">Back to course @getCourseID</a></p>
+                    <p><a href="~/">Back to front page</a></p>
                 }
                 else {
                     var selectedData = db.Query("SELECT course_id, course_name FROM T_Course");
@@ -132,8 +153,11 @@
                     foreach(var course in selectedData) {
                         <p><a href="?course=@course.course_id">@course.course_id @course.course_name</a></p>
                     }
+                    <hr>
                 }
             }
+
+            <a href="login.cshtml">Log in</a>
         </div>
     </body>
 </html>
