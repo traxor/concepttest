@@ -1,24 +1,25 @@
 ﻿@{    
-    var coursenameInput = "";
+    var courseNameInput = "";
     var dateInput = "";
     var passwordInput = "";
+    var successMessage = "";
 
     var db = Database.Open("102547-concepttest");
     var selected = db.Query("SELECT * FROM T_Course");
     
     var grid = new WebGrid(source: selected, rowsPerPage: 3);
+    Validation.RequireField("date", "You must submit a Date");
+    Validation.RequireField("password", "You must submit a Password");
 
     if(IsPost && Validation.IsValid())
-    {
-        Validation.RequireField("date", "You must submit a Date");
-        Validation.RequireField("password", "You must submit a Password");
-        
-        coursenameInput = Request.Form["course_name"];        
+    {        
+        courseNameInput = Request.Form["course_name"];        
         dateInput = Request.Form["date"];
         passwordInput = Request.Form["password"];
 
         var addCommand = "INSERT INTO T_Lecture (date, course_id, password) VALUES (@0, @1, @2)";
-        db.Execute(addCommand, dateInput, coursenameInput, passwordInput);
+        db.Execute(addCommand, dateInput, courseNameInput, passwordInput);
+        successMessage = "Lecture successfully added to database!";
     }
     
 }
@@ -28,35 +29,39 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title></title>
+        <link rel="stylesheet" type="text/css" href="StyleSheet.css">
+        <title>Add Lecture</title>
     </head>
     <body>
-    <h1>
-    Add a new Lecture:
-    </h1>
-    <h3>
-    Please fill in the fields below and click "Submit" to continue.
-    </h3>
-
-        <form method="post">
-            Course name:
-            <select id="course_name" name="course_name" style="margin-left: 40px" >
-                <option value="">-- Select Course --</option>
-                @foreach(var category in selected){
-                    <option value="@category.id">@category.course_name</option>
-                }
-            </select>
-            <p>
-            Date (yyyy-mm-dd):
-            <input type="text" name="date" value="" size="16" />
-            @Html.ValidationMessage("date")
-            </p>
-            <p>
-            Password:
-            <input type="text" name="password" value="" size="16" style="margin-left: 60px" />
-            @Html.ValidationMessage("password")
-            </p>
-            <input type="Submit" name="Submit" value="Submit" />
-        </form>
+        @{
+            if(IsPost && Validation.IsValid()) {
+                <div>
+                    <p>Course name: @courseNameInput</p>
+                    <p>Date: @dateInput</p>
+                    <p>Password: @passwordInput</p>
+                    <h2>@successMessage</h2>
+                    <p><a href="addLecture.cshtml">Add another Lecture</a></p>
+                </div>
+            }
+            else {
+                <form method="post">
+                    <div>
+                        <h1>Add Lecture</h1>
+                        <hr>
+                        Course name:
+                        <select id="course_name" name="course_name" style="margin-left: 36px" >
+                            <option value="">-- Select Course --</option>
+                            @foreach(var category in selected) {
+                                <option value="@category.id">@category.course_name</option>
+                            }
+                        </select>
+                        <p>Date (yyyy-mm-dd): <input type="text" name="date" size="16" /> @Html.ValidationMessage("date")</p>
+                        <p>Password: <input type="text" name="password" size="16" style="margin-left: 58px" /> @Html.ValidationMessage("password")</p>
+                        <p><input type="Submit" name="Submit" value="Submit" /></p>
+                        <p><a href="dashboard.cshtml">Back to dashboard</a></p>
+                    </div>
+                </form>
+            }
+        }
     </body>
 </html>

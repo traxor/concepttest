@@ -1,19 +1,28 @@
 ﻿@{
-    var courseidInput = "";
-    var coursenameInput = "";
+    var courseIdInput = "";
+    var courseNameInput = "";
+    var successMessage = "";
+    var errorMessage =  "";
+    bool isValidCourseId =  false;
 
     var db = Database.Open("102547-concepttest");
+    Validation.RequireField("course_id", "You must submit a Course ID");
+    Validation.RequireField("course_name", "You must submit a Course name");
 
     if(IsPost && Validation.IsValid())
-    {
-        Validation.RequireField("course_id", "You must submit a Course ID");
-        Validation.RequireField("course_name", "You must submit a Course name");
-        
-        courseidInput = Request.Form["course_id"];
-        coursenameInput = Request.Form["course_name"];
+    {        
+        courseIdInput = Request.Form["course_id"];
+        courseNameInput = Request.Form["course_name"];
 
-        var addCommand = "INSERT INTO T_Course (course_id, course_name) VALUES (@0, @1)";
-        db.Execute(addCommand, courseidInput, coursenameInput);
+        if (db.QueryValue("SELECT COUNT(*) FROM T_Course WHERE course_id = @0", courseIdInput) == 0) {
+            var addCommand = "INSERT INTO T_Course (course_id, course_name) VALUES (@0, @1)";
+            db.Execute(addCommand, courseIdInput, courseNameInput);
+            successMessage = "Course successfully added to database!";
+            isValidCourseId = true;
+        }
+        else {
+            errorMessage = "Course ID already exist, please try another Course ID.";
+        }
     }
     
 }
@@ -23,27 +32,31 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title></title>
+        <link rel="stylesheet" type="text/css" href="StyleSheet.css">
+        <title>Add Course</title>
     </head>
     <body>
-    <h1>
-    Add a new Course:
-    </h1>
-    <h3>
-    Please fill in the fields below and click "Submit" to continue.
-    </h3>
-        <form method="post">
-            <p>
-            Course ID:
-            <input type="text" name="course_id" value="" style="margin-left: 24px" />
-            @Html.ValidationMessage("course_id")
-            </p>
-            <p>
-            Course name:
-            <input type="text" name="course_name" value="" style="margin-left: 8px" />
-            @Html.ValidationMessage("course_name")
-            </p>
-            <input type="Submit" name="Submit" value="Submit" />
-        </form>
+        @{
+            if(IsPost && Validation.IsValid() && isValidCourseId) {
+                <div>
+                    <p>Course ID: @courseIdInput</p>
+                    <p>Course name: @courseNameInput</p>
+                    <h2>@successMessage</h2>
+                    <p><a href="addCourse.cshtml">Add another Course</a></p>
+                </div>
+            }
+            else {
+                <form method="post">
+                    <div>
+                        <h1>Add Course</h1>
+                        <hr>
+                        <p>Course ID: <input type="text" name="course_id" size="16" style="margin-left: 21px" /> @Html.ValidationMessage("course_id") @errorMessage</p>
+                        <p>Course name: <input type="text" name="course_name" size="16" /> @Html.ValidationMessage("course_name")</p>
+                        <p><input type="Submit" name="Submit" value="Submit" /></p>
+                        <p><a href="dashboard.cshtml">Back to dashboard</a></p>
+                    </div>
+                </form>
+            }
+        }
     </body>
 </html>
