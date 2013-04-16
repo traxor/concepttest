@@ -73,41 +73,56 @@
                             <div>
                             @{var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", question.id);
                             var selectedAnswersRight = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE question_id = @0 AND correct = 1", question.id);
-                            <p><b>@question.question</b> @selectedAnswersRight / @selectedAnswers.Count Question ID: @question.id</p>
+                            <p><b>@question.question</b></p>
                             
                             if(selectedAnswersRight == 1) {
                                 foreach(var answer in selectedAnswers) {
-                                    <p><input type="radio" name="@question.id" value="@answer.id"> ID: @answer.id @answer.answer</p>
+                                    <p><input type="radio" name="question-@question.id" value="@answer.id"> @answer.answer</p>
                                 }
+                                
                                 if(IsPost) {
                                     try {
-                                        //var answer = Request.Form[@question.id];
-                                        <p>You selected answer: @Request.Form[@question.id] for question @question.id</p>
-                                        //var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
-                                        //db.Execute(insertCommand, @question.id, answer, Request.QueryString["lecture"]);
+                                        var answer = Request.Form["question-" + question.id];
+                                        <p>For question @question.id you answered: @answer</p>
+                                        var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
+                                        db.Execute(insertCommand, @question.id, answer, Request.QueryString["lecture"]);
                                     }
                                     catch (Exception e) {
-                                        Response.Write("Exception occured: " + e + "<br/>");
+                                        <p>Exception occured: @e</p>
                                     }
                                     finally {
-                                        Response.Write("Answer added!<br/>");
+                                        <p>Answer added!</p>
                                     }
                                     
                                 }
                             }
-                            /*else {
+                            else {
                                 foreach(var answer in selectedAnswers) {
-                                    <p><input type="checkbox" name="@question.id" value="@answer.id"> @answer.answer</p>
+                                    <p><input type="checkbox" name="question-@question.id" value="@answer.id"> @answer.answer</p>
                                 }
-                                /*if(IsPost) {
-                                    var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
-                                    db.Execute(insertCommand, @question.id, Request.Form[@question.id], Request.QueryString["lecture"]);
-                                    
+                                if(IsPost) {
+                                    var answer = Request.Form["question-" + question.id];
+                                    string[] answers = answer.Split(',');
+                                    <p>For question @question.id you answered: @answer</p>
+                                    foreach(string word in answers) {
+                                        try {
+                                            //<p>@word</p>
+                                            var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
+                                            db.Execute(insertCommand, @question.id, word, Request.QueryString["lecture"]);
+                                        }
+                                        catch (Exception e) {
+                                            <p>Exception occured: @e</p>
+                                        }
+                                        finally {
+                                            <p>Answer added!</p>
+                                        }
+                                    }
                                 }
-                            }*/}
+                            }}
                             </div>
                         }
                         <input type="submit" value="Answer">
+                            
                         </form>
                     }
                 }
