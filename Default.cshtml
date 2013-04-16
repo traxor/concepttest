@@ -87,7 +87,14 @@
 
                         if(hasAnsweredAllQuestions == "0") {
                             <h2>SVARA PÅ ALLA FRÅGOR!</h2>
-                        } }
+                        }
+                        else if(hasAnsweredAllQuestions == "1") {
+                            HttpCookie studentCookie = new HttpCookie("studentCookie-" + Request.QueryString["lecture"]);
+                            studentCookie.Value = Request.QueryString["lecture"];
+                            studentCookie.Expires = DateTime.Now.AddMinutes(1);
+                            Response.Cookies.Add(studentCookie);
+                        }
+                        }
                         @foreach(var question in selectedQuestion) {
                             <div>
                             @{var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", question.id);
@@ -138,7 +145,13 @@
                             }}
                             </div>
                         }
-                        <input type="submit" value="Answer">
+                        @if(Request.Cookies["studentCookie-" + Request.QueryString["lecture"]] == null) {
+                            <input type="submit" value="Answer">
+                        }
+                        else {
+                            <input type="submit" value="Answer" disabled>
+                        }
+                        
                             
                         </form>
                     }
