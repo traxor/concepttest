@@ -7,7 +7,10 @@
         
     Validation.RequireField("username", "You must enter a username!");
     Validation.RequireField("password", "You must enter a password!"); 
-    
+    if (Session["id"] != null) {
+        Response.Redirect(redirect);
+    }
+
     if(IsPost && Validation.IsValid()) {
         usernameInput = Request.Form["username"];
         passwordInput = Request.Form["password"];
