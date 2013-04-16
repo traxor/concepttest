@@ -1,7 +1,7 @@
 ﻿@{
     System.Web.UI.WebControls.DropDownList ddl = new System.Web.UI.WebControls.DropDownList();
     
-    
+
 
     //Page.Title = "Add Question";
     var Question = "";
@@ -10,7 +10,6 @@
     var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0";
     var addcommand = "INSERT INTO T_Question (question, tags) Values (@0, @1)";
     var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
-    var addanswer = "INSERT INTO T_Answer (question_Id, answer, correct)Values(@0, @1, @2)";
 
     var db = Database.Open("102547-concepttest");
     var selected = db.Query("SELECT * FROM T_Course");
@@ -24,13 +23,10 @@
         if(Validation.IsValid()){
             Question = Request.Form["Question"];
             Tags = Request.Form["Tags"];
-            var Answer = Request.Form["Answer"];
-            Boolean correct = true;
             db.Execute("START TRANSACTION");
                 db.Execute(addcommand, Question, Tags);
                 var id = db.GetLastInsertId();
                 db.Execute(addrelation, id, lectureId);
-                db.Execute(addanswer, id, Answer, correct);
             db.Execute("COMMIT");
         }
     }  
