@@ -1,0 +1,49 @@
+﻿@{
+    var courseidInput = "";
+    var coursenameInput = "";
+
+    var db = Database.Open("102547-concepttest");
+
+    if(IsPost && Validation.IsValid())
+    {
+        Validation.RequireField("course_id", "You must submit a Course ID");
+        Validation.RequireField("course_name", "You must submit a Course name");
+        
+        courseidInput = Request.Form["course_id"];
+        coursenameInput = Request.Form["course_name"];
+
+        var addCommand = "INSERT INTO T_Course (course_id, course_name) VALUES (@0, @1)";
+        db.Execute(addCommand, courseidInput, coursenameInput);
+    }
+    
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+    </head>
+    <body>
+    <h1>
+    Add a new Course:
+    </h1>
+    <h3>
+    Please fill in the fields below and click "Submit" to continue.
+    </h3>
+        <form method="post">
+            <p>
+            Course ID:
+            <input type="text" name="course_id" value="" style="margin-left: 24px" />
+            @Html.ValidationMessage("course_id")
+            </p>
+            <p>
+            Course name:
+            <input type="text" name="course_name" value="" style="margin-left: 8px" />
+            @Html.ValidationMessage("course_name")
+            </p>
+            <input type="Submit" name="Submit" value="Submit" />
+        </form>
+    </body>
+</html>
