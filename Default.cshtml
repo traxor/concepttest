@@ -79,15 +79,29 @@
                                 if(IsPost) {
                                     hasAnsweredAllQuestions = "1";
                                     foreach(var question in selectedQuestion) {
-                                        if(Request.Form["question-" + question.id] == null) {
+                                        var selectedAnswersRight = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE question_id = @0 AND correct = 1", question.id);
+                                        if(selectedAnswersRight == 1) {
+                                            if(Request.Form["question-" + question.id] == null) {
+                                                hasAnsweredAllQuestions = "0";
+                                            }
+                                        }
+                                        else if(Request.Form["question-" + question.id] != null) {
+                                            var answer = Request.Form["question-" + question.id];
+                                            string[] answers = answer.Split(',');
+                                            if(answers.Length != selectedAnswersRight) {
+                                                hasAnsweredAllQuestions = "0";
+                                            }
+                                        }
+                                        else {
                                             hasAnsweredAllQuestions = "0";
                                         }
+                                        
                                     }
                                 }
                         
 
                             if(hasAnsweredAllQuestions == "0") {
-                                <h2>SVARA PÅ ALLA FRÅGOR!</h2>
+                                <h2>You have not entered valid answers!</h2>
                             }
                             }
                             @foreach(var question in selectedQuestion) {
@@ -125,6 +139,7 @@
                                     }
                                 }
                                 else if(selectedAnswersRight > 1) {
+                                    <p>(@selectedAnswersRight answers)</p>
                                     foreach(var answer in selectedAnswers) {
                                         <p><input type="checkbox" name="question-@question.id" value="@answer.id"> @answer.answer</p>
                                     }
