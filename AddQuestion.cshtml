@@ -11,7 +11,7 @@
     var course="";
     var nr = 0;
     
-    bool correct=true;
+    
     var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0";
     var addcommand = "INSERT INTO T_Question (question, tags) Values (@0, @1)";
     var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
@@ -30,8 +30,6 @@
             Question = Request.Form["Question"];
             Tags = Request.Form["Tags"];
             
-            
-            
                 db.Execute("START TRANSACTION");
                     db.Execute(addcommand, Question, Tags);
                     var id = db.GetLastInsertId();
@@ -39,8 +37,13 @@
                     //Variabeln för antal svar måste fixas
                     for(int k = 1; k <= 10; k++){
                         Answer = Request.Form[k.ToString()];
+                        var correct = Request.Form[(k+10).ToString()];
                         if(Answer != null && Answer != ""){
-                            db.Execute(addanswer, id, Answer, correct);
+                            if(correct == "correct"){
+                                db.Execute(addanswer, id, Answer, 1);
+                            }else{
+                                db.Execute(addanswer, id, Answer, 0);
+                            }
                         }
                     }
                 db.Execute("COMMIT");
@@ -57,46 +60,70 @@
 
                 <script type="text/javascript">
                     var i = 0;
+                    var j = 10;
 
                     function addform() {
 
-                        var parentdiv = document.getElementById("mydiv");
-                        var br = document.createElement();
-                        br.innerHTML = "<br/>";
+                        var parentdiv = document.getElementById("answerfield");
 
                         i++;
+                        j++;
+
                         var text = document.createElement();
                         text.innerHTML = "Answer " + (i) + ": ";
-                        var input = document.createElement("input");
-                        input.setAttribute("type", "text");
-                        input.setAttribute("name", i);
-                        input.setAttribute("value", "");
 
+                        var correcttext = document.createElement();
+                        correcttext.innerHTML = "Correct: ";
+
+                        var newrow = document.createElement();
+                        newrow.innerHTML = "<br/>";
+
+                        var Answer = document.createElement("input");
+                        Answer.setAttribute("type", "text");
+                        Answer.setAttribute("name", i);
+                        Answer.setAttribute("value", "");
+
+                        var checkbox = document.createElement("input");
+                        checkbox.type = "Checkbox";
+                        checkbox.name = j;
+                        checkbox.value = "correct";
+                        
                         parentdiv.appendChild(text);
-                        parentdiv.appendChild(input);
-                        parentdiv.appendChild(br);
+                        parentdiv.appendChild(Answer);
+                        parentdiv.appendChild(correcttext);
+                        parentdiv.appendChild(checkbox);
+                        parentdiv.appendChild(newrow);
 
+                    }
+
+                    function updatelectures() {
+
+                        var lectures = document.getElementById("lectures");
+                        document.forms["Submit"].submit();
                     }
                 </script>
 
         <title>Add Question</title>
     </head>
     <body>
-        <form method="post">
+        <form method="post" id="Submit">
 
             <div id="mydiv">
 
                 <h1>Add question</h1>
 
                 <hr>
-                @Answer
+                <br/>
 
-
-                <select id="categoryId" name="categoryId">
+                <select id="categoryId" name="categoryId" onchange="updatelectures()">
                     <option value="">-- Select course --</option>
 
                     @foreach(var category in selected){
-                            <option value="@category.id">@category.course_name</option>
+                            if(Request.Form["categoryId"] == category.id.ToString()){
+                                <option value="@category.id" selected>@category.course_name</option>
+                            }else{
+                                <option value="@category.id">@category.course_name</option>
+                            }
                     }
                 </select>
             
@@ -126,14 +153,12 @@
                 Add Answer
                 <br/>
 
-
+                <p id="answerfield"></p>
                 
                 <input type="Submit" name="Submit" value="Submit" />                
                 
                 <p><a href="dashboard.cshtml">Back to dashboard</a></p>
-
             </div>
-
         </form>
     </body>
 </html>
