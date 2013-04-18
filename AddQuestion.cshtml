@@ -91,9 +91,9 @@
                     }
                 </select>
 
-                <br/>
+                <br/><br/>
                 Question:
-                <input type="text" name="Question" value="" style="margin-left: 26px" />
+                <input type="text" name="Question" value="" style="margin-left: 23px" />
                 @Html.ValidationMessage("Question")
                 <br/>
                 Tags:
@@ -101,11 +101,13 @@
                 @Html.ValidationMessage("Tags")
                 <br/>
                 <br/>
+                Number of answers
                 <input type="button" name="addanswer" value="+" onclick="addform()" />
-                Add Answer
+                <input type="button" name="removeanswer" value="-" onclick="removeform()" />
+                
                 <br/>
 
-                <p id="answerfield"></p>
+                <p name="answerfield" id="answerfield"></p>
 
                 <input type="hidden" id="counter" name="counter"/>
                 
