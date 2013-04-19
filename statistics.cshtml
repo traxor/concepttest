@@ -1,0 +1,120 @@
+﻿@{
+    var redirectLogin = "~/login.cshtml";
+    var pageTitle = "Statistics";
+    var db = Database.Open("102547-concepttest");
+
+    
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+   <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" type="text/css" href="StyleSheet.css">
+        <title>@pageTitle</title>
+    </head>
+    <body>
+        <div>
+            <h1>Statistics</h1>
+            <hr>
+            @{
+                if (Session["id"] != null) {
+                    if(Request.QueryString["course"] != null) {
+                        var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
+                        var selectedLecture = db.Query("SELECT id, date FROM T_Lecture WHERE course_id = @0", selectedData.id);
+                        var grid = new WebGrid(source: selectedLecture, defaultSort: "id", rowsPerPage: 3);
+                        <h2>@selectedData.course_id @selectedData.course_name</h2>
+                        <p>Lectures:</p>
+                        if(selectedLecture.Count < 1) {
+                            <p><i>No lectures for selected course...</i></p>
+                        }
+                        else {
+                            foreach(var lecture in selectedLecture) {
+                                <p><a href="?lecture=@lecture.id">@lecture.date</a></p>
+                            }
+                            <hr>
+                            <p><a href="~/statistics.cshtml">Back to Statistics</a></p>
+                        }
+                    }
+                    else if (Request.QueryString["lecture"] != null && Request.QueryString["question"] == null) {
+                        var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
+                        var lecture = db.QuerySingle("SELECT T_Lecture.date, T_Lecture.id FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
+                        var questions = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
+                        <h2>@course.course_id @course.course_name - @lecture.date</h2>
+                        <p>Questions:</p>
+
+                        if (questions.Count() < 1) {
+                            <p><i>No questions for selected lecture...</i></p>
+                        }
+                        else {
+                            foreach(var question in questions) {
+                                <p><a href="?lecture=@lecture.id&question=@question.id">@question.question</a></p>
+                            }
+                            <hr>
+                            var getCourseID = db.QueryValue("SELECT T_Course.course_id FROM T_Course, T_Lecture WHERE T_Course.id = T_Lecture.course_id AND T_Lecture.id = @0", Request.QueryString["lecture"]);
+                            <p><a href="?course=@getCourseID">Back to course @getCourseID</a></p>
+                        }
+                    }
+                    else if (Request.QueryString["question"] != null && Request.QueryString["lecture"] != null) {
+                        var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id INNER JOIN T_Question_Lecture ON T_Lecture.id = T_Question_Lecture.lecture_id WHERE T_Question_Lecture.question_id = @0", Request.QueryString["question"]);
+                        var lecture = db.QuerySingle("SELECT T_Lecture.date FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
+                        var question = db.QuerySingle("SELECT T_Question.question FROM T_Question WHERE T_Question.id = @0", Request.QueryString["question"]);
+                        var correctAnswer = db.Query("SELECT T_Answer.answer FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
+                        var correctAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
+                        var totalNumberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = 1 AND T_Answer.question_id = @0 AND T_Statistics.lecture_id = @1", Request.QueryString["question"], Request.QueryString["lecture"]);
+                        var totalNumberOfAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.question_id = @0 AND T_Statistics.lecture_id = @1", Request.QueryString["question"], Request.QueryString["lecture"]);
+                        var singleQuestion = db.Query("SELECT T_Answer.answer, COUNT(*) as count " 
+                                + "FROM T_Answer, T_Statistics "
+                                + "WHERE T_Statistics.answer_id = T_Answer.id " 
+                                + "AND T_Answer.question_id = @0 "
+                                + "AND T_Statistics.lecture_id = @1 " 
+                                + "GROUP BY T_Answer.answer", Request.QueryString["question"], Request.QueryString["lecture"]);
+
+                        if(singleQuestion.Count() < 1) {
+                            <p><i>No statistics for this question...</i></p>
+                        }
+                        else {
+                       
+
+                            <h2>@course.course_id @course.course_name - @lecture.date</h2>
+                            <h3>@question.question</h3>
+                            <p>Correct Answer/s:</p>
+                            if (correctAnswers == 1) {
+                                float procent = ((float)totalNumberOfCorrectAnswers/(float)totalNumberOfAnswers)*100;
+                                foreach(var answer in correctAnswer) {
+                                    <p><b>@answer.answer - @procent.ToString("#.##")%</b></p>
+                                }    
+                            }
+                            else {
+                                float numberOfStudents = (float)totalNumberOfAnswers/(float)correctAnswers;
+                                <p>@numberOfStudents</p>
+                                //HÄR SKA JAG JOBBA NÄSTA GÅNG!
+                            }
+                           
+                            <p><img alt="statistics chart" src="~/chart.cshtml?lecture=@Request.QueryString["lecture"]&question=@Request.QueryString["question"]&type=singleQuestion" /></p>
+                        }
+                        <hr>
+                        var getLecture = db.QuerySingle("SELECT T_Lecture.date FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
+                        <p><a href="?lecture=@Request.QueryString["lecture"]">Back to lecture @getLecture.date</a></p>
+                    }
+                    else {
+                        var selectedData = db.Query("SELECT course_id, course_name FROM T_Course");
+                        <h1>Select a course</h1>
+                        foreach(var course in selectedData) {
+                            <p><a href="?course=@course.course_id">@course.course_id @course.course_name</a></p>
+                        }
+                        <hr>
+                    }
+                }
+                else {
+                    Response.Redirect(redirectLogin);
+                }
+            }
+            <p><a href="~/dashboard.cshtml">Back to Dashboard</a></p>
+            <p><a href="~/logout.cshtml">Log out</a></p>
+        </div>
+        
+    </body>
+</html>
+

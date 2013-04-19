@@ -5,6 +5,7 @@
     var addCourseLink = "";
     var addLectureLink = "";
     var addQuestionLink = "";
+    var statisticsLink = "";
     var logoutLink = "/logout.cshtml";
     var redirectLogin = "~/login.cshtml";
     bool admin = false;
@@ -16,6 +17,7 @@
         addCourseLink = "/addcourse.cshtml";
         addLectureLink = "/addlecture.cshtml";
         addQuestionLink = "/addquestion.cshtml";
+        statisticsLink = "/statistics.cshtml";
         int userId = (int)(Session["id"]);
         var db = Database.Open("102547-concepttest");
         var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", userId);
@@ -52,6 +54,8 @@
             <a href="@addLectureLink">Add Lecture</a>
             <br/>
             <a href="@addQuestionLink">Add Question</a>
+            <br/>
+            <a href="@statisticsLink">Statistics</a>
 
             @{ 
                 if (admin == true) {
