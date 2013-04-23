@@ -9,7 +9,7 @@ function addform() {
 
     var parentdiv = document.getElementById("answerfield");
 
-    parseInt(document.getElementById("counter")).value++;
+    document.getElementById("counter").value++;
                         
     i++;
     j++;
@@ -26,11 +26,13 @@ function addform() {
     var Answer = document.createElement("input");
     Answer.type = "text"
     Answer.id = i;
+    Answer.name = i;
     Answer.value = "";
 
     var checkbox = document.createElement("input");
     checkbox.type = "Checkbox";
     checkbox.id = j;
+    checkbox.name = j;
     checkbox.value = "correct";
 
     parentdiv.appendChild(text);
@@ -49,6 +51,8 @@ function removeform(){
     var parentdiv = document.getElementById("answerfield");
 
     document.getElementById("counter").value--;
+    
+
 
     var answer = document.getElementById(i);
     var checkbox = document.getElementById(j);
