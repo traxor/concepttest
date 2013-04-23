@@ -1,4 +1,5 @@
 ﻿@{
+    var redirect = "~/login.cshtml";
     var courseIdInput = "";
     var courseNameInput = "";
     var successMessage = "";
@@ -6,25 +7,29 @@
     bool isValidCourseId =  false;
 
     var db = Database.Open("102547-concepttest");
-    Validation.RequireField("course_id", "You must submit a Course ID");
-    Validation.RequireField("course_name", "You must submit a Course name");
+    if (Session["id"] != null) {
+        int userId = (int)(Session["id"]);
+        Validation.RequireField("course_id", "You must submit a Course ID");
+        Validation.RequireField("course_name", "You must submit a Course name");
 
-    if(IsPost && Validation.IsValid())
-    {        
-        courseIdInput = Request.Form["course_id"];
-        courseNameInput = Request.Form["course_name"];
+        if(IsPost && Validation.IsValid()) {        
+            courseIdInput = Request.Form["course_id"];
+            courseNameInput = Request.Form["course_name"];
 
-        if (db.QueryValue("SELECT COUNT(*) FROM T_Course WHERE course_id = @0", courseIdInput) == 0) {
-            var addCommand = "INSERT INTO T_Course (course_id, course_name) VALUES (@0, @1)";
-            db.Execute(addCommand, courseIdInput, courseNameInput);
-            successMessage = "Course successfully added to database!";
-            isValidCourseId = true;
-        }
-        else {
-            errorMessage = "Course ID already exist, please try another Course ID.";
+            if (db.QueryValue("SELECT COUNT(*) FROM T_Course WHERE course_id = @0", courseIdInput) == 0) {
+                var addCommand = "INSERT INTO T_Course (course_id, course_name) VALUES (@0, @1)";
+                db.Execute(addCommand, courseIdInput, courseNameInput);
+                successMessage = "Course successfully added to database!";
+                isValidCourseId = true;
+            }
+            else {
+                errorMessage = "Course ID already exist, please try another Course ID.";
+            }
         }
     }
-    
+    else {
+        Response.Redirect(redirect);
+    }
 }
 
 <!DOCTYPE html>
@@ -60,6 +65,7 @@
         }
     </body>
 </html>
+
 
 @{
     if(db!=null) {

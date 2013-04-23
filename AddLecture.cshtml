@@ -1,4 +1,5 @@
 ﻿@{    
+    var redirect = "~/login.cshtml";
     var courseNameInput = "";
     var courseNameOutput = "";
     var dateInput = "";
@@ -7,23 +8,27 @@
 
     var db = Database.Open("102547-concepttest");
     var selected = db.Query("SELECT * FROM T_Course");
+    if (Session["id"] != null) {
+        int userId = (int)(Session["id"]);
     
-    Validation.RequireField("course_name", "You must select a Course");
-    Validation.RequireField("date", "You must submit a Date");
-    Validation.RequireField("password", "You must submit a Password");
+        Validation.RequireField("course_name", "You must select a Course");
+        Validation.RequireField("date", "You must submit a Date");
+        Validation.RequireField("password", "You must submit a Password");
 
-    if(IsPost && Validation.IsValid())
-    {        
-        courseNameInput = Request.Form["course_name"];
-        dateInput = Request.Form["date"];
-        passwordInput = Request.Form["password"];
-        courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", courseNameInput);
+        if(IsPost && Validation.IsValid()) {        
+            courseNameInput = Request.Form["course_name"];
+            dateInput = Request.Form["date"];
+            passwordInput = Request.Form["password"];
+            courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", courseNameInput);
 
-        var addCommand = "INSERT INTO T_Lecture (date, course_id, password) VALUES (@0, @1, @2)";
-        db.Execute(addCommand, dateInput, courseNameInput, passwordInput);
-        successMessage = "Lecture successfully added to database!";
+            var addCommand = "INSERT INTO T_Lecture (date, course_id, password) VALUES (@0, @1, @2)";
+            db.Execute(addCommand, dateInput, courseNameInput, passwordInput);
+            successMessage = "Lecture successfully added to database!";
+        }
     }
-
+    else {
+        Response.Redirect(redirect);
+    }   
 }
 
 <!DOCTYPE html>
