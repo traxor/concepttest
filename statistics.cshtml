@@ -32,7 +32,7 @@
                         }
                         else {
                             <p>Result:</p>
-                            <table border="1">
+                            <table border="1" class="blackborder">
                             <tr>
                             <th>Correct Answers</th>
                             <th>Number of Answers</th>
@@ -69,7 +69,7 @@
                         }
                         else {
                         <p>Result:</p>
-                        <table border="1">
+                        <table border="1" class="blackborder">
                         <tr>
                         <th>Correct Answers</th>
                         <th>Number of Answers</th>
@@ -112,7 +112,7 @@
                             <h2>@course.course_id @course.course_name - @lecture.date</h2>
                             <h3>@question.question</h3>
                             <p>Result:</p>
-                            <table border="1">
+                            <table border="1" class="blackborder">
                             <tr>
                             <th>Answer</th>
                             <th>Number of Answers</th>
@@ -161,7 +161,13 @@
                             }
                             </table>
                             <p>Chart:</p>
-                            <p><img alt="statistics chart" src="~/chart.cshtml?lecture=@Request.QueryString["lecture"]&question=@Request.QueryString["question"]&type=lectureQuestion" /></p>
+                            if(Request.Browser["IsMobileDevice"] == "true") {
+                                <p><img alt="statistics chart" width="100%" src="~/chart.cshtml?lecture=@Request.QueryString["lecture"]&question=@Request.QueryString["question"]&type=lectureQuestion" /></p>
+                            }
+                            else {
+                                <p><img alt="statistics chart" src="~/chart.cshtml?lecture=@Request.QueryString["lecture"]&question=@Request.QueryString["question"]&type=lectureQuestion" /></p>
+
+                            }
                         }
                         <hr>
                         var getLecture = db.QuerySingle("SELECT T_Lecture.date FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
@@ -184,7 +190,7 @@
                         else {
                             <h2>@question.question</h2>
                             <p>Result:</p>
-                            <table border="1">
+                            <table border="1" class="blackborder">
                             <tr>
                             <th>Answer</th>
                             <th>Number of Answers</th>
@@ -233,7 +239,12 @@
                             }
                             </table>
                             <p>Chart:</p>
-                            <p><img alt="statistics chart" src="~/chart.cshtml?question=@Request.QueryString["question"]&type=singleQuestion" /></p>
+                            if(Request.Browser["IsMobileDevice"] == "true") {
+                                <p><img alt="statistics chart" width="100%" src="~/chart.cshtml?question=@Request.QueryString["question"]&type=singleQuestion" /></p>
+                            }
+                            else {
+                                <p><img alt="statistics chart" src="~/chart.cshtml?question=@Request.QueryString["question"]&type=singleQuestion" /></p>
+                            }
                         }
                         <hr>
                         <p><a href="~/searchtags.cshtml">Back to search questions by tags</a></p>
