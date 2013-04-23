@@ -23,13 +23,28 @@
                     if(Request.QueryString["course"] != null) {
                         var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
                         var selectedLecture = db.Query("SELECT id, date FROM T_Lecture WHERE course_id = @0", selectedData.id);
-                        var grid = new WebGrid(source: selectedLecture, defaultSort: "id", rowsPerPage: 3);
+                        var numberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer, T_Lecture, T_Course WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = true AND T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = T_Course.id AND T_Course.course_id = @0", Request.QueryString["course"]);
+                        var numberOfAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Statistics, T_Lecture, T_Course WHERE T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = T_Course.id AND T_Course.course_id = @0", Request.QueryString["course"]);
+                        float percent = ((float)numberOfCorrectAnswers/(float)numberOfAnswers)*100;
                         <h2>@selectedData.course_id @selectedData.course_name</h2>
-                        <p>Lectures:</p>
-                        if(selectedLecture.Count < 1) {
+                        if(numberOfAnswers < 1) {
                             <p><i>No lectures for selected course...</i></p>
                         }
                         else {
+                            <p>Result:</p>
+                            <table border="1">
+                            <tr>
+                            <th>Correct Answers</th>
+                            <th>Number of Answers</th>
+                            <th>Percent correct</th>
+                            </tr>
+                            <tr>
+                            <td>@numberOfCorrectAnswers</td>
+                            <td>@numberOfAnswers</td>
+                            <td>@percent.ToString("#.##")%</td>
+                            </tr>
+                            </table>
+                            <p>Lectures:</p>
                             foreach(var lecture in selectedLecture) {
                                 <p><a href="?lecture=@lecture.id">@lecture.date</a></p>
                             }
@@ -41,13 +56,32 @@
                         var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
                         var lecture = db.QuerySingle("SELECT T_Lecture.date, T_Lecture.id FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
                         var questions = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
+                        var numberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = true AND T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
+                        var numberOfAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Statistics WHERE T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
+                        float percent = ((float)numberOfCorrectAnswers/(float)numberOfAnswers)*100;
                         <h2>@course.course_id @course.course_name - @lecture.date</h2>
-                        <p>Questions:</p>
 
-                        if (questions.Count() < 1) {
+                        if (numberOfAnswers < 1) {
                             <p><i>No questions for selected lecture...</i></p>
+                            <hr>
+                            var getCourseID = db.QueryValue("SELECT T_Course.course_id FROM T_Course, T_Lecture WHERE T_Course.id = T_Lecture.course_id AND T_Lecture.id = @0", Request.QueryString["lecture"]);
+                            <p><a href="?course=@getCourseID">Back to course @getCourseID</a></p>
                         }
                         else {
+                        <p>Result:</p>
+                        <table border="1">
+                        <tr>
+                        <th>Correct Answers</th>
+                        <th>Number of Answers</th>
+                        <th>Percent correct</th>
+                        </tr>
+                        <tr>
+                        <td>@numberOfCorrectAnswers</td>
+                        <td>@numberOfAnswers</td>
+                        <td>@percent.ToString("#.##")%</td>
+                        </tr>
+                        </table>
+                        <p>Questions:</p>
                             foreach(var question in questions) {
                                 <p><a href="?lecture=@lecture.id&question=@question.id">@question.question</a></p>
                             }
@@ -64,7 +98,7 @@
                         var correctAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
                         var totalNumberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = 1 AND T_Answer.question_id = @0 AND T_Statistics.lecture_id = @1", Request.QueryString["question"], Request.QueryString["lecture"]);
                         var totalNumberOfAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.question_id = @0 AND T_Statistics.lecture_id = @1", Request.QueryString["question"], Request.QueryString["lecture"]);
-                        var singleQuestion = db.Query("SELECT T_Answer.answer, COUNT(*) as count " 
+                        var singleQuestion = db.Query("SELECT T_Answer.answer, COUNT(*) as count, T_Answer.correct " 
                                 + "FROM T_Answer, T_Statistics "
                                 + "WHERE T_Statistics.answer_id = T_Answer.id " 
                                 + "AND T_Answer.question_id = @0 "
@@ -75,23 +109,58 @@
                             <p><i>No statistics for this question...</i></p>
                         }
                         else {
-                       
-
                             <h2>@course.course_id @course.course_name - @lecture.date</h2>
                             <h3>@question.question</h3>
-                            <p>Correct Answer/s:</p>
-                            if (correctAnswers == 1) {
-                                float procent = ((float)totalNumberOfCorrectAnswers/(float)totalNumberOfAnswers)*100;
-                                foreach(var answer in correctAnswer) {
-                                    <p><b>@answer.answer - @procent.ToString("#.##")%</b></p>
+                            <p>Result:</p>
+                            <table border="1">
+                            <tr>
+                            <th>Answer</th>
+                            <th>Number of Answers</th>
+                            <th>Percent</th>
+                            </tr>
+                            @if (correctAnswers == 1) {
+                                foreach(var answer in singleQuestion) {
+                                    float procent = ((float)answer.count/(float)totalNumberOfAnswers)*100;
+                                    if (answer.correct == true) {
+                                        <tr>
+                                        <td><b>@answer.answer</b></td>
+                                        <td><b>@answer.count</b></td>
+                                        <td><b>@procent.ToString("#.##")%</b></td>
+                                        </tr>  
+                                    }
+                                    else {
+                                        <tr>
+                                        <td>@answer.answer</td>
+                                        <td>@answer.count</td>
+                                        <td>@procent.ToString("#.##")%</td>
+                                        </tr>
+                                    }
+                                    
                                 }    
                             }
                             else {
                                 float numberOfStudents = (float)totalNumberOfAnswers/(float)correctAnswers;
-                                <p>@numberOfStudents</p>
-                                //HÄR SKA JAG JOBBA NÄSTA GÅNG!
+                                foreach (var answer in singleQuestion) {
+                                    float procent = ((float)answer.count/(float)numberOfStudents)*100;
+                                    if(answer.correct == true) {
+                                        <tr>
+                                        <td><b>@answer.answer</b></td>
+                                        <td><b>@answer.count</b></td>
+                                        <td><b>@procent.ToString("#.##")%</b></td>
+                                        </tr>
+                                    }
+                                    else {
+                                        <tr>
+                                        <td>@answer.answer</td>
+                                        <td>@answer.count</td>
+                                        <td>@procent.ToString("#.##")%</td>
+                                        </tr>
+                                    }
+                                    
+                                }
                             }
-                           
+                            </table>
+                            <p>Chart:</p>
                             <p><img alt="statistics chart" src="~/chart.cshtml?lecture=@Request.QueryString["lecture"]&question=@Request.QueryString["question"]&type=singleQuestion" /></p>
                         }
                         <hr>
