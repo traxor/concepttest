@@ -61,16 +61,16 @@
                         <hr>
                         <table class="invisborder">
                             <tr>
-                                <td>Course name:</td>
+                                <td align="right">Course name:</td>
                                 <td>
                                 <select id="course_name" name="course_name">
                                         <option value="">-- Select Course --</option>                              
                                         @foreach(var category in selected) {
                                             if(Request.Form["course_name"] == category.id.ToString()) {
-                                                <option value="@category.id" selected>@category.course_name</option>
+                                                <option value="@category.id" selected>@category.course_id @category.course_name</option>
                                             }
                                             else {
-                                                <option value="@category.id">@category.course_name</option>
+                                                <option value="@category.id">@category.course_id @category.course_name</option>
                                             }
                                         }
                                     </select>
@@ -78,12 +78,12 @@
                                 <td>@Html.ValidationMessage("course_name")</td>
                             </tr>
                             <tr>
-                                <td>Date (yyyy-mm-dd):</td>
+                                <td align="right">Date (yyyy-mm-dd):</td>
                                 <td><input type="text" name="date" size="16"/></td>
                                 <td>@Html.ValidationMessage("date")</td>
                             </tr>
                             <tr>
-                                <td>Password:</td>
+                                <td align="right">Password:</td>
                                 <td><input type="text" name="password" size="16"/></td>
                                 <td>@Html.ValidationMessage("password")</td>
                             </tr>
@@ -95,25 +95,29 @@
                         </table>
                         </form>
                         
+                        @{
+                        if(IsPost && Request.Form["removeLecture"] != null && Request.QueryString["type"] == "remove") {
+                            var removeCommand = "DELETE FROM T_Lecture WHERE T_Lecture.id = @0";
+                            db.Execute(removeCommand, Request.Form["removeLecture"]);
+                            successMessage = "Successfully removed " + Request.Form["removeLecture"] + " from database!";
+                        }
+                        <p>@successMessage</p>
+                        
+                        var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture WHERE creator_id = @0", Session["id"]);
+                        if(removeLectures.Count() > 0) {
                         <h1>Remove lecture</h1>
                         <hr>
                         <form method="post" action="?type=remove">
                             @{
-                                if(IsPost && Request.Form["removeLecture"] != null && Request.QueryString["type"] == "remove") {
-                                    var removeCommand = "DELETE FROM T_Lecture WHERE T_Lecture.id = @0";
-                                    db.Execute(removeCommand, Request.Form["removeLecture"]);
-                                    successMessage = "Successfully removed " + Request.Form["removeLecture"] + " from database!";
-                                }
-                                var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture WHERE creator_id = @0", Session["id"]);
-                                foreach(var lecture in removeLectures) {
-                                    <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
-                                }
-
-                                
+                            foreach(var lecture in removeLectures) {
+                                <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
+                            }
                             }
                             <input type="submit" value="Remove">
-                            <p>@successMessage</p>
                         </form>
+                        }
+                        }
+                        <hr>
                         <a href="dashboard.cshtml">Back to dashboard</a>
                     </div>
                 
