@@ -1,12 +1,18 @@
 ﻿@{
     var db = Database.Open("102547-concepttest");
     //var statistics = db.Query("SELECT T_Answer.answer, COUNT(*) as count FROM T_Answer, T_Statistics, T_Question_Lecture WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.question_id = @0 AND T_Question_Lecture.lecture_id = @1 GROUP BY T_Answer.answer", Request.QueryString["question"], Request.QueryString["lecture"]);
-    var singleQuestion = db.Query("SELECT T_Answer.answer, COUNT(*) as count " 
+    var lectureQuestion = db.Query("SELECT T_Answer.answer, COUNT(*) as count " 
                                 + "FROM T_Answer, T_Statistics "
                                 + "WHERE T_Statistics.answer_id = T_Answer.id " 
                                 + "AND T_Answer.question_id = @0 "
                                 + "AND T_Statistics.lecture_id = @1 " 
                                 + "GROUP BY T_Answer.answer", Request.QueryString["question"], Request.QueryString["lecture"]);
+
+    var singleQuestion = db.Query("SELECT T_Answer.answer, COUNT(*) as count " 
+                                + "FROM T_Answer, T_Statistics "
+                                + "WHERE T_Statistics.answer_id = T_Answer.id " 
+                                + "AND T_Answer.question_id = @0 "
+                                + "GROUP BY T_Answer.answer", Request.QueryString["question"]);
 
     if (Request.QueryString["type"] == "singleQuestion") {
         var statsChart = new Chart(width: 600, height: 400) 
@@ -16,5 +22,15 @@
                 yValues: singleQuestion, yFields: "count")
             
             .Write();
-    }    
+    }
+
+     if (Request.QueryString["type"] == "lectureQuestion") {
+        var statsChart = new Chart(width: 600, height: 400) 
+            .AddTitle("Answers")
+            .AddSeries(chartType:"column",
+                xValue: lectureQuestion, xField: "answer",
+                yValues: lectureQuestion, yFields: "count")
+            
+            .Write();
+    }       
 }
