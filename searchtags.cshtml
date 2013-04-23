@@ -1,0 +1,71 @@
+﻿@{
+    var pageTitle = "Search tags";
+
+    var db = Database.Open("102547-concepttest");
+    //if(IsPost) {
+        var input = "%" + Request.QueryString["tagsInput"] + "%";
+        var selected = db.Query("SELECT * FROM T_Question WHERE tags like @0", input);
+    //}
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" type="text/css" href="StyleSheet.css">
+        <title>@pageTitle</title>
+        <script>
+            function updateQuestion() {
+                //var lectures = document.getElementById("lectures");
+                document.forms["Submit"].submit();
+            }
+        </script>
+    </head>
+    <body>
+        <div>
+            <h1>Search question by tags</h1>
+            <hr>
+            <form method="get">
+                Tags: <input type="text" name="tagsInput" value="@Request.QueryString["tagsInput"]">
+                <input type="submit" value="Search">
+            </form>
+            <br/>
+            @{
+                if(Request.QueryString["tagsInput"] != null) {
+                    <form method="post" id="Submit">
+                    <select name="questions" onchange="updateQuestion()">
+                        <option value="null">-- Select a question --</option>
+                        @foreach(var question in selected) {
+                            
+                            if(Request.Form["questions"] == question.id.ToString()) {
+                                <option value="@question.id" selected>@question.question</option>
+                            }
+                            else {
+                                <option value="@question.id">@question.question</option>
+                            }
+                        }
+                    </select>
+                    
+                    @{var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", Request.Form["questions"]);
+                    foreach(var answer in selectedAnswers) {
+                        if(answer.correct == true) {
+                            <p><b>@answer.answer</b></p>
+                        }
+                        else {
+                            <p>@answer.answer</p>
+                        }
+                    }
+                    if(Request.Form["questions"] != null) {
+                        <p><a href="statistics.cshtml?question=@Request.Form["questions"]&type=1">See statistics for this question</a></p>
+                    }}
+                    
+                    <!--<input type="submit" value="Submit">-->
+                    </form>
+                }
+            }
+            <p><a href="~/dashboard.cshtml">Back to Dashboard</a></p>
+            <p><a href="~/logout.cshtml">Log out</a></p>
+        </div>
+    </body>
+</html>

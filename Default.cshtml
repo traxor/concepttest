@@ -69,7 +69,10 @@
                     if(lecturename == Request.QueryString["lecture"]) {
                         var selectQuestionId = db.Query("SELECT question_id FROM T_Question_Lecture WHERE lecture_id = @0", Request.QueryString["lecture"]);
                         var selectQuestionCount = db.QueryValue("SELECT COUNT(*) FROM T_Question_Lecture WHERE lecture_id = @0", Request.QueryString["lecture"]);
-                        var selectedQuestion = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
+                        var selectedQuestion = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question "
+                                                    + "INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id "
+                                                    + "WHERE T_Question_Lecture.lecture_id = @0 "
+                                                    + "AND (SELECT COUNT(*) FROM T_Answer WHERE T_Answer.question_id = T_Question.id AND T_Answer.correct = 1) > 0", Request.QueryString["lecture"]);
                         var hasAnsweredAllQuestions = "";
                         if(selectQuestionCount > 0) {
                             <form method="post">
