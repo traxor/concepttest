@@ -1,5 +1,6 @@
 ﻿@{    
     var courseNameInput = "";
+    var courseNameOutput = "";
     var dateInput = "";
     var passwordInput = "";
     var successMessage = "";
@@ -7,21 +8,22 @@
     var db = Database.Open("102547-concepttest");
     var selected = db.Query("SELECT * FROM T_Course");
     
-    var grid = new WebGrid(source: selected, rowsPerPage: 3);
+    Validation.RequireField("course_name", "You must select a Course");
     Validation.RequireField("date", "You must submit a Date");
     Validation.RequireField("password", "You must submit a Password");
 
     if(IsPost && Validation.IsValid())
     {        
-        courseNameInput = Request.Form["course_name"];        
+        courseNameInput = Request.Form["course_name"];
         dateInput = Request.Form["date"];
         passwordInput = Request.Form["password"];
+        courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", courseNameInput);
 
         var addCommand = "INSERT INTO T_Lecture (date, course_id, password) VALUES (@0, @1, @2)";
         db.Execute(addCommand, dateInput, courseNameInput, passwordInput);
         successMessage = "Lecture successfully added to database!";
     }
-    
+
 }
 
 <!DOCTYPE html>
@@ -36,7 +38,7 @@
         @{
             if(IsPost && Validation.IsValid()) {
                 <div>
-                    <p>Course name: @courseNameInput</p>
+                    <p>Course name: @courseNameOutput</p>
                     <p>Date: @dateInput</p>
                     <p>Password: @passwordInput</p>
                     <h2>@successMessage</h2>
@@ -48,13 +50,21 @@
                     <div>
                         <h1>Add Lecture</h1>
                         <hr>
-                        Course name:
-                        <select id="course_name" name="course_name" style="margin-left: 36px" >
-                            <option value="">-- Select Course --</option>
-                            @foreach(var category in selected) {
-                                <option value="@category.id">@category.course_name</option>
-                            }
-                        </select>
+                        <p>
+                            Course name:
+                            <select id="course_name" name="course_name" style="margin-left: 36px" >
+                                <option value="">-- Select Course --</option>                              
+                                @foreach(var category in selected) {
+                                    if(Request.Form["course_name"] == category.id.ToString()) {
+                                        <option value="@category.id" selected>@category.course_name</option>
+                                    }
+                                    else {
+                                        <option value="@category.id">@category.course_name</option>
+                                    }
+                                }
+                            </select>
+                            @Html.ValidationMessage("course_name")
+                        </p>
                         <p>Date (yyyy-mm-dd): <input type="text" name="date" size="16" /> @Html.ValidationMessage("date")</p>
                         <p>Password: <input type="text" name="password" size="16" style="margin-left: 58px" /> @Html.ValidationMessage("password")</p>
                         <p><input type="Submit" name="Submit" value="Submit" /></p>
@@ -65,3 +75,9 @@
         }
     </body>
 </html>
+
+@{
+    if(db!=null) {
+        db.Close();
+    }
+}
