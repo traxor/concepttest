@@ -67,6 +67,7 @@
                     
                     if(Request.Form["questions"] != null && selectedAnswers.Count() > 0) {
                         <p><a href="statistics.cshtml?question=@Request.Form["questions"]&type=1">See statistics for this question</a></p>
+                        <p><a href="statistics.cshtml?question=@Request.Form["questions"]&type=2">Compare statistics for this question on different lectures</a></p>
                     }}
                     
                     <!--<input type="submit" value="Submit">-->
