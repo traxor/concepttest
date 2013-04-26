@@ -30,6 +30,7 @@
                     time = int.Parse(reader.GetAttribute(0));
                 }
             }
+            reader.Close();
             int userId = db.QueryValue("SELECT id FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
             Session["id"] = userId;
             Session.Timeout = time;
