@@ -171,23 +171,25 @@
                                 grid = new WebGrid(source: data, rowsPerPage: 5);
                             }
 
+                            if(IsPost && !Request["addoldquestion"].IsEmpty())
+                            {
+                                var addoldquestion = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
+                                db.Execute(addoldquestion, Request.Form["oldquestions"], Request.Form["lectures"]);
+                            }
+
                         }
                         <form method="get" id="Search">
                             <h1>Search Old Questions</h1>
                             <input type="text" name="searchphrase" value="" />
                             <input type="Submit" name="oldquestion" value="Search"/>
-                        </form>
-                            @if(!Request.Form["searchphrase"].IsEmpty()){
-                                @grid.GetHtml(
-                                    tableStyle: "grid",
-                                    headerStyle: "head",
-                                    alternatingRowStyle: "alt",
-                                    columns: grid.Columns(
-                                        grid.Column("question"),
-                                        grid.Column("tags")
-                                    )
-                                )
-                            }
+                            <p>
+                            <select id="oldquestions" name="oldquestions">
+                                <option value="" disabled>-- Select question --</option>
+                                @foreach(var matchingquestions in data) {
+                                    <option value="@matchingquestions.id">@matchingquestions.question</option>
+                                }
+                            </select>
+                            <input type="Submit" name="addoldquestion" value="Add to lecture" />
                     </div>
                 </form>
             }
