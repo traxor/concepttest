@@ -84,7 +84,7 @@
             course = Request.Form["categoryId"];
             var selectedlectures = db.Query(selectcommand, course);
             courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", course);
-        
+            
             if(IsPost && !Request["Submit"].IsEmpty() && Validation.IsValid() && successMessage != "") {
                 <div>
                     <p>Course: @courseNameOutput</p>
@@ -99,36 +99,50 @@
                         <h1>Add question</h1>
                         <hr>
                         <p>
-                            Course:
-                            <select id="categoryId" name="categoryId" onchange="updatelectures()" style="margin-left: 51px">
-                                <option value="">-- Select course --</option>
-                                @foreach(var category in selected) {
-                                    if(Request.Form["categoryId"] == category.id.ToString()) {
-                                        <option value="@category.id" selected>@category.course_name</option>
-                                    }
-                                    else {
-                                        <option value="@category.id">@category.course_name</option>
-                                    }
-                                }
-                            </select>
-                            @Html.ValidationMessage("categoryId")
-                        </p>
-                        <p>
-                            Lecture:
-                            <select id="lectures" name="lectures" style="margin-left: 49px">
-                                <option value="" disabled>-- Select lecture --</option>
-                                @foreach(var matchinglectures in selectedlectures) {
-                                    <option value="@matchinglectures.id">@matchinglectures.date</option>
-                                }
-                            </select>
-                            @Html.ValidationMessage("lectures")
-                        </p>
-                        <p>Question: <input type="text" name="Question" size="16" style="margin-left: 38px" /> @Html.ValidationMessage("Question")</p>
-                        <p>Tags (optional): <input type="text" name="Tags" size="16" /></p>
-                        <p>Number of answers (max 10): <input type="button" name="addanswer" value="+" onclick="addform()" /> <input type="button" name="removeanswer" value="-" onclick="removeform()" /></p>
+                        <table class="invisborder">
+                            <tr>
+                                <td align="left">Course:</td>
+                                <td>
+                                    <select id="categoryId" name="categoryId" onchange="updatelectures()">
+                                        <option value="">-- Select course --</option>
+                                        @foreach(var category in selected) {
+                                            if(Request.Form["categoryId"] == category.id.ToString()) {
+                                                <option value="@category.id" selected>@category.course_name</option>
+                                            }
+                                            else {
+                                                <option value="@category.id">@category.course_name</option>
+                                            }
+                                        }
+                                    </select>
+                                    @Html.ValidationMessage("categoryId")
+                                </td>
+                                <td>Lecture:</td>
+                                <td>
+                                    <select id="lectures" name="lectures">
+                                        <option value="" disabled>-- Select lecture --</option>
+                                        @foreach(var matchinglectures in selectedlectures) {
+                                            <option value="@matchinglectures.id">@matchinglectures.date</option>
+                                        }
+                                    </select>
+                                    @Html.ValidationMessage("lectures")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Question:</td> 
+                                <td><input type="text" name="Question" size="16"/> @Html.ValidationMessage("Question")</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Tags (optional):</td> 
+                                <td><input type="text" name="Tags" size="16" /></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <p>Number of answers (max 10):<input type="button" name="addanswer" value="+" onclick="addform()" /> <input type="button" name="removeanswer" value="-" onclick="removeform()" /></p>
                         <p id="answerfield"></p>
-                        <p><input type="hidden" id="counter" name="counter" value="0"/></p>
-                        <p><input type="Submit" name="Submit" value="Submit" /></p>            
+                        <p><input type="Submit" name="Submit" value="Submit" /><input type="hidden" id="counter" name="counter" value="0"/></p>            
                         <p><a href="dashboard.cshtml">Back to dashboard</a></p>
                     </div>
                     <div id="test">
