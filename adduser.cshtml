@@ -1,4 +1,16 @@
 ﻿@using System.Text.RegularExpressions;
+@using System.Security.Cryptography;
+@functions{
+
+    public static string CreateSHAHash(string Password, string Salt)
+    {
+        SHA512Managed HashTool = new SHA512Managed();
+        Byte[] PasswordAsByte = System.Text.Encoding.UTF8.GetBytes(string.Concat(Password, Salt));
+        Byte[] EncryptedBytes = HashTool.ComputeHash(PasswordAsByte);
+        HashTool.Clear();
+        return BitConverter.ToString(EncryptedBytes).Replace("-", "");
+    }
+}
 @{
     string u = Request.ServerVariables["HTTP_USER_AGENT"];
     Regex b = new Regex(@"(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino", RegexOptions.IgnoreCase | RegexOptions.Multiline);
@@ -32,7 +44,8 @@
                 passwordInput = Request.Form["password"];
                 nameInput = Request.Form["name"];
                 if (db.QueryValue("SELECT count(*) FROM T_User WHERE username = @0", usernameInput) == 0) {
-                    string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
+                    string pwhash = CreateSHAHash(CreateSHAHash(passwordInput, "hej"), usernameInput);
+                    //string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
 
                     //var db = Database.Open("102547-concepttest");
                     var insertCommand = "INSERT INTO T_User (username, password, name) VALUES(@0, @1, @2)";
