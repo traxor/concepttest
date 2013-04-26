@@ -48,22 +48,33 @@
                     </select>
                     
                     @{var selectedAnswers = db.Query("SELECT * FROM T_Answer WHERE question_id = @0", Request.Form["questions"]);
-                    foreach(var answer in selectedAnswers) {
-                        if(answer.correct == true) {
-                            <p><b>@answer.answer</b></p>
+                    if(selectedAnswers.Count() > 0) {
+                        <ul>
+                        @foreach(var answer in selectedAnswers) {
+                            if(answer.correct == true) {
+                                <li><b>@answer.answer</b></li>
+                            }
+                            else {
+                                <li>@answer.answer</li>
+                            }
                         }
-                        else {
-                            <p>@answer.answer</p>
-                        }
+                        </ul>
                     }
-                    if(Request.Form["questions"] != null) {
+                    else {
+                        <p><i>No answers for this question...</i></p>
+                    }
+                    
+                    
+                    if(Request.Form["questions"] != null && selectedAnswers.Count() > 0) {
                         <p><a href="statistics.cshtml?question=@Request.Form["questions"]&type=1">See statistics for this question</a></p>
+                        <p><a href="statistics.cshtml?question=@Request.Form["questions"]&type=2">Compare statistics for this question on different lectures</a></p>
                     }}
                     
                     <!--<input type="submit" value="Submit">-->
                     </form>
                 }
             }
+            <hr>
             <p><a href="~/dashboard.cshtml">Back to Dashboard</a></p>
             <p><a href="~/logout.cshtml">Log out</a></p>
         </div>

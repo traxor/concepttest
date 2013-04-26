@@ -11,18 +11,21 @@
     if (Session["id"] != null) {
         int userId = (int)(Session["id"]);
     
-        Validation.RequireField("course_name", "You must select a Course");
-        Validation.RequireField("date", "You must submit a Date");
-        Validation.RequireField("password", "You must submit a Password");
+        if(Request.QueryString["type"] == "add") {
+            Validation.RequireField("course_name", "You must select a Course");
+            Validation.RequireField("date", "You must submit a Date");
+            Validation.RequireField("password", "You must submit a Password");
+        }
+        
 
-        if(IsPost && Validation.IsValid()) {        
+        if(IsPost && Validation.IsValid() && Request.QueryString["type"] == "add") {        
             courseNameInput = Request.Form["course_name"];
             dateInput = Request.Form["date"];
             passwordInput = Request.Form["password"];
             courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", courseNameInput);
 
-            var addCommand = "INSERT INTO T_Lecture (date, course_id, password) VALUES (@0, @1, @2)";
-            db.Execute(addCommand, dateInput, courseNameInput, passwordInput);
+            var addCommand = "INSERT INTO T_Lecture (date, course_id, password, creator_id) VALUES (@0, @1, @2, @3)";
+            db.Execute(addCommand, dateInput, courseNameInput, passwordInput, userId);
             successMessage = "Lecture successfully added to database!";
         }
     }
@@ -41,7 +44,7 @@
     </head>
     <body>
         @{
-            if(IsPost && Validation.IsValid()) {
+            if(IsPost && Validation.IsValid() && Request.QueryString["type"] == "add") {
                 <div>
                     <p>Course name: @courseNameOutput</p>
                     <p>Date: @dateInput</p>
@@ -51,31 +54,73 @@
                 </div>
             }
             else {
-                <form method="post">
+                
                     <div>
+                        <form method="post" action="?type=add">
                         <h1>Add Lecture</h1>
                         <hr>
-                        <p>
-                            Course name:
-                            <select id="course_name" name="course_name" style="margin-left: 36px" >
-                                <option value="">-- Select Course --</option>                              
-                                @foreach(var category in selected) {
-                                    if(Request.Form["course_name"] == category.id.ToString()) {
-                                        <option value="@category.id" selected>@category.course_name</option>
-                                    }
-                                    else {
-                                        <option value="@category.id">@category.course_name</option>
-                                    }
-                                }
-                            </select>
-                            @Html.ValidationMessage("course_name")
-                        </p>
-                        <p>Date (yyyy-mm-dd): <input type="text" name="date" size="16" /> @Html.ValidationMessage("date")</p>
-                        <p>Password: <input type="text" name="password" size="16" style="margin-left: 58px" /> @Html.ValidationMessage("password")</p>
-                        <p><input type="Submit" name="Submit" value="Submit" /></p>
-                        <p><a href="dashboard.cshtml">Back to dashboard</a></p>
+                        <table class="invisborder">
+                            <tr>
+                                <td align="right">Course name:</td>
+                                <td>
+                                <select id="course_name" name="course_name">
+                                        <option value="">-- Select Course --</option>                              
+                                        @foreach(var category in selected) {
+                                            if(Request.Form["course_name"] == category.id.ToString()) {
+                                                <option value="@category.id" selected>@category.course_id @category.course_name</option>
+                                            }
+                                            else {
+                                                <option value="@category.id">@category.course_id @category.course_name</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                                <td>@Html.ValidationMessage("course_name")</td>
+                            </tr>
+                            <tr>
+                                <td align="right">Date (yyyy-mm-dd):</td>
+                                <td><input type="text" name="date" size="16"/></td>
+                                <td>@Html.ValidationMessage("date")</td>
+                            </tr>
+                            <tr>
+                                <td align="right">Password:</td>
+                                <td><input type="text" name="password" size="16"/></td>
+                                <td>@Html.ValidationMessage("password")</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><input type="Submit" name="Submit" value="Submit" /></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        </form>
+                        
+                        @{
+                        if(IsPost && Request.Form["removeLecture"] != null && Request.QueryString["type"] == "remove") {
+                            var removeCommand = "DELETE FROM T_Lecture WHERE T_Lecture.id = @0";
+                            db.Execute(removeCommand, Request.Form["removeLecture"]);
+                            successMessage = "Successfully removed " + Request.Form["removeLecture"] + " from database!";
+                        }
+                        <p>@successMessage</p>
+                        
+                        var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture WHERE creator_id = @0", Session["id"]);
+                        if(removeLectures.Count() > 0) {
+                        <h1>Remove lecture</h1>
+                        <hr>
+                        <form method="post" action="?type=remove">
+                            @{
+                            foreach(var lecture in removeLectures) {
+                                <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
+                            }
+                            }
+                            <input type="submit" value="Remove">
+                        </form>
+                        }
+                        }
+                        <hr>
+                        <a href="dashboard.cshtml">Back to dashboard</a>
                     </div>
-                </form>
+                
             }
         }
     </body>
