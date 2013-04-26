@@ -9,16 +9,18 @@
     var db = Database.Open("102547-concepttest");
     if (Session["id"] != null) {
         int userId = (int)(Session["id"]);
-        Validation.RequireField("course_id", "You must submit a Course ID");
-        Validation.RequireField("course_name", "You must submit a Course name");
-
-        if(IsPost && Validation.IsValid()) {        
+        if(Request.QueryString["type"] == "add") {
+            Validation.RequireField("course_id", "You must submit a Course ID");
+            Validation.RequireField("course_name", "You must submit a Course name");
+        }
+        
+        if(IsPost && Validation.IsValid() && Request.QueryString["type"] == "add") {        
             courseIdInput = Request.Form["course_id"];
             courseNameInput = Request.Form["course_name"];
 
             if (db.QueryValue("SELECT COUNT(*) FROM T_Course WHERE course_id = @0", courseIdInput) == 0) {
-                var addCommand = "INSERT INTO T_Course (course_id, course_name) VALUES (@0, @1)";
-                db.Execute(addCommand, courseIdInput, courseNameInput);
+                var addCommand = "INSERT INTO T_Course (course_id, course_name, creator_id) VALUES (@0, @1, @2)";
+                db.Execute(addCommand, courseIdInput, courseNameInput, userId);
                 successMessage = "Course successfully added to database!";
                 isValidCourseId = true;
             }
@@ -26,6 +28,9 @@
                 errorMessage = "Course ID already exist, please try another Course ID.";
             }
         }
+
+    }
+    else if(IsPost && Validation.IsValid() && Request.QueryString["type"]  == "remove") {
     }
     else {
         Response.Redirect(redirect);
@@ -42,7 +47,7 @@
     </head>
     <body>
         @{
-            if(IsPost && Validation.IsValid() && isValidCourseId) {
+            if(IsPost && Validation.IsValid() && isValidCourseId && Request.QueryString["type"] == "add") {
                 <div>
                     <p>Course ID: @courseIdInput</p>
                     <p>Course name: @courseNameInput</p>
@@ -50,17 +55,66 @@
                     <p><a href="addCourse.cshtml">Add another Course</a></p>
                 </div>
             }
-            else {
-                <form method="post">
+             else { 
+                
                     <div>
+                        <form method="post" action="?type=add">
                         <h1>Add Course</h1>
                         <hr>
-                        <p>Course ID: <input type="text" name="course_id" size="16" style="margin-left: 21px" /> @Html.ValidationMessage("course_id") @errorMessage</p>
-                        <p>Course name: <input type="text" name="course_name" size="16" /> @Html.ValidationMessage("course_name")</p>
-                        <p><input type="Submit" name="Submit" value="Submit" /></p>
-                        <p><a href="dashboard.cshtml">Back to dashboard</a></p>
-                    </div>
-                </form>
+                        <table class="invisborder">
+                            <tr>
+                                <td align="right">Course ID:</td>
+                                <td><input type="text" name="course_id" size="16"/></td>
+                                <td>@Html.ValidationMessage("course_id")</td>
+                            </tr>
+                            <tr>
+                                <td align="right">Course Name:</td>
+                                <td><input type="text" name="course_name" size="16"/></td>
+                                <td>@Html.ValidationMessage("course_name")</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><input type="Submit" name="Submit" value="Submit" /></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        </form>
+
+                @{
+                    if(IsPost && Request.Form["removeCourse"] != null && Request.QueryString["type"] == "remove") {
+                        var removeCourse = "DELETE FROM T_Course WHERE T_Course.id = @0";
+                        var removeLecturesInCourse = "DELETE FROM T_Lecture WHERE T_Lecture.course_id = @0";
+                        try {
+                            db.Execute("start transaction");
+                            db.Execute(removeCourse, Request.Form["removeCourse"]);
+                            db.Execute(removeLecturesInCourse, Request.Form["removeCourse"]);
+                            db.Execute("commit");  
+                        }
+                        catch {
+                            successMessage = "Error";
+                        }
+                          
+                        successMessage = "Successfully removed " + Request.Form["removeCourse"] + " from database!";
+                    }
+                    var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0", Session["id"]);
+                    if(getCourses.Count() > 0) {
+                        <h1>Remove course</h1>
+                        <hr>
+                        <form method="post" action="?type=remove">
+                            @{
+                                foreach(var course in getCourses) {
+                                    <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
+                                }
+                            }
+                            <input type="submit" value="Remove">
+                        </form>
+                        <p>@successMessage</p>
+                    }
+                }
+            <hr>
+            <p><a href="dashboard.cshtml">Back to dashboard</a></p>
+            </div>
+                
             }
         }
     </body>
