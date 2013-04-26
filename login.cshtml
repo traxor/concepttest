@@ -23,9 +23,16 @@
         string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
         var checkInput = db.QueryValue("SELECT COUNT(*) FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
         if(checkInput != 0) {
+            int time = 0;
+            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(Server.MapPath("~/settings.xml"));
+            while (reader.Read()) {
+                if (reader.NodeType == System.Xml.XmlNodeType.Element && reader.Name == "sessiontime") {
+                    time = int.Parse(reader.GetAttribute(0));
+                }
+            }
             int userId = db.QueryValue("SELECT id FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
             Session["id"] = userId;
-            Session.Timeout = 1;
+            Session.Timeout = time;
             Response.Redirect(redirect);
         }
         else {
