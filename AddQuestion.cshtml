@@ -1,4 +1,8 @@
 ﻿@{
+    if (Session["id"] == null) {
+        Response.Redirect("~/login.cshtml");
+    }
+
     var Question = "";
     var Tags = "";
     var Answer = "";
@@ -9,7 +13,7 @@
     var successMessage = "";
     
     var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0";
-    var addcommand = "INSERT INTO T_Question (question, tags) Values (@0, @1)";
+    var addcommand = "INSERT INTO T_Question (question, tags, creator_id) Values (@0, @1, @2)";
     var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
     var addanswer = "INSERT INTO T_Answer (question_id, answer, correct) Values (@0, @1, @2)";
 
@@ -25,28 +29,40 @@
         lectureOutput = db.QueryValue("SELECT date FROM T_Lecture WHERE id = @0", lectureId);
 
         if(Validation.IsValid()) {
-            Question = Request.Form["Question"];
-            Tags = Request.Form["Tags"];
-            db.Execute("START TRANSACTION");
-            db.Execute(addcommand, Question, Tags);
-            var id = db.GetLastInsertId();
-            db.Execute(addrelation, id, lectureId);
             int count = Int16.Parse(Request.Form["counter"]);
+            if(count >= 1) {
 
-            for(int k = 1; k <= count; k++) {
-                Answer = Request.Form[k.ToString()];
-                var correct = Request.Form[(k+10).ToString()];
-                if(Answer != null && Answer != "") {
-                    if(correct == "correct") {
-                        db.Execute(addanswer, id, Answer, 1);
+                Question = Request.Form["Question"];
+                Tags = Request.Form["Tags"];
+                bool transactionstatus = true;
+
+                //Vad händer om Session tagit slut när man "submitar" en fråga?
+                db.Execute("START TRANSACTION");
+                    db.Execute(addcommand, Question, Tags, (int)(Session["id"]));
+                    var id = db.GetLastInsertId();
+                    db.Execute(addrelation, id, lectureId);
+            
+                    for(int k = 1; k <= count; k++) {
+                        Answer = Request.Form[k.ToString()];
+                        var correct = Request.Form[(k+10).ToString()];
+                        if(Answer != null && Answer != "") {
+                            if(correct == "correct") {
+                                db.Execute(addanswer, id, Answer, 1);
+                            }
+                            else {
+                                db.Execute(addanswer, id, Answer, 0);
+                            }
+                        }else{
+                            transactionstatus = false;
+                        }
                     }
-                    else {
-                        db.Execute(addanswer, id, Answer, 0);
-                    }
+                if(transactionstatus){
+                    db.Execute("COMMIT");
+                    successMessage = "Question successfully added to database!";
+                }else{
+                    db.Execute("ROLLBACK");
                 }
             }
-            db.Execute("COMMIT");
-            successMessage = "Question successfully added to database!";
         }
     }  
 }
@@ -68,8 +84,8 @@
             course = Request.Form["categoryId"];
             var selectedlectures = db.Query(selectcommand, course);
             courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", course);
-
-            if(IsPost && !Request["Submit"].IsEmpty() && Validation.IsValid()) {
+        
+            if(IsPost && !Request["Submit"].IsEmpty() && Validation.IsValid() && successMessage != "") {
                 <div>
                     <p>Course: @courseNameOutput</p>
                     <p>Lecture: @lectureOutput</p>
@@ -77,8 +93,7 @@
                     <h2>@successMessage</h2>
                     <p><a href="addQuestion.cshtml">Add another Question</a></p>
                 </div>
-            }
-            else {
+            }else {
                 <form method="post" id="Submit">
                     <div id="mydiv">
                         <h1>Add question</h1>
@@ -112,9 +127,42 @@
                         <p>Tags (optional): <input type="text" name="Tags" size="16" /></p>
                         <p>Number of answers (max 10): <input type="button" name="addanswer" value="+" onclick="addform()" /> <input type="button" name="removeanswer" value="-" onclick="removeform()" /></p>
                         <p id="answerfield"></p>
-                        <p><input type="hidden" id="counter" name="counter"/></p>
+                        <p><input type="hidden" id="counter" name="counter" value="0"/></p>
                         <p><input type="Submit" name="Submit" value="Submit" /></p>            
                         <p><a href="dashboard.cshtml">Back to dashboard</a></p>
+                    </div>
+                    <div id="test">
+                        @{
+                            var search = "";
+                            var searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
+
+                            var data = db.Query(searchphrase, "%" + search + "%");
+                            var grid = new WebGrid(source: data, rowsPerPage: 5);
+
+                            if(IsPost && !Request["oldquestion"].IsEmpty())
+                            {
+                                search = Request.Form["searchphrase"];
+                                data = db.Query(searchphrase, "%" + search + "%");
+                                grid = new WebGrid(source: data, rowsPerPage: 5);
+                            }
+
+                        }
+                        <form method="get" id="Search">
+                            <h1>Search Old Questions</h1>
+                            <input type="text" name="searchphrase" value="" />
+                            <input type="Submit" name="oldquestion" value="Search"/>
+                        </form>
+                            @if(!Request.Form["searchphrase"].IsEmpty()){
+                                @grid.GetHtml(
+                                    tableStyle: "grid",
+                                    headerStyle: "head",
+                                    alternatingRowStyle: "alt",
+                                    columns: grid.Columns(
+                                        grid.Column("question"),
+                                        grid.Column("tags")
+                                    )
+                                )
+                            }
                     </div>
                 </form>
             }
