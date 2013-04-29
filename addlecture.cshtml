@@ -43,6 +43,7 @@
         <title>Add Lecture</title>
     </head>
     <body>
+        @_includes.dashboard()
         @{
             if(IsPost && Validation.IsValid() && Request.QueryString["type"] == "add") {
                 <div>

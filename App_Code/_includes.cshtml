@@ -1,4 +1,66 @@
 ﻿@using System.Text.RegularExpressions;
 @helper dashboard() {
-    <div></div>
+    var pageTitle = "Dashboard";
+    var addUserLink = "";
+    var addCourseLink = "";
+    var addLectureLink = "";
+    var addQuestionLink = "";
+    var statisticsLink = "";
+    var searchTagsLink = "";
+    var settingsLink = "";
+    var logoutLink = "/logout.cshtml";
+    var redirectLogin = "~/login.cshtml";
+    bool admin = false;
+    var getUsername = "";
+    var getName = "";
+
+    if (Session["id"] != null) {
+
+        addCourseLink = "/addcourse.cshtml";
+        addLectureLink = "/addlecture.cshtml";
+        addQuestionLink = "/addquestion.cshtml";
+        statisticsLink = "/statistics.cshtml";
+        searchTagsLink = "/searchtags.cshtml";
+        settingsLink  = "/settings.cshtml";
+        int userId = (int)(Session["id"]);
+        var db = Database.Open("102547-concepttest");
+        var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", userId);
+        var queryDb = db.QuerySingle("SELECT username, name FROM T_User WHERE id = @0", Session["id"]);
+        getUsername = queryDb.username;
+        getName = queryDb.name;
+        if (checkIfAdmin != 0) {
+            addUserLink = "/adduser.cshtml";
+            admin = true;
+        }
+    }
+    else {
+        Response.Redirect(redirectLogin);
+    }
+    <div>
+        <h1>Dashboard</h1>
+        <hr>
+        <h3>Welcome @getName!</h3>
+        <p>logged in as <i>@getUsername</i></p>
+            
+        <a href="@addCourseLink">Manage course</a>
+        <br/>
+        <a href="@addLectureLink">Manage lecture</a>
+        <br/>
+        <a href="@addQuestionLink">Manage question</a>
+        <br/>
+        <a href="@statisticsLink">Statistics</a>
+        <br/>
+        <a href="@searchTagsLink">Search question by tags</a>
+
+        @{ 
+            if (admin == true) {
+                <br/>
+                <a href="@addUserLink">Add User</a>
+                <br/>
+                <a href="@settingsLink">Settings</a>
+            }
+        }
+        <br/>
+        <p><a href="@logoutLink">Logout</a></p>
+    </div>
 }

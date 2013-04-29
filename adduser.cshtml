@@ -76,6 +76,7 @@
         <title>@pageTitle</title>
     </head>
     <body onload="scaleWidth();" onresize="scaleWidth();">
+        @_includes.dashboard()
         @{
             if(IsPost && Validation.IsValid() && isValidUsername) {
                 <div>

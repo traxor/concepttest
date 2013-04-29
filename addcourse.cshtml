@@ -57,6 +57,7 @@
         <title>Add Course</title>
     </head>
     <body onload="scaleWidth();" onresize="scaleWidth();">
+        @_includes.dashboard()
         @{
             if(IsPost && Validation.IsValid() && isValidCourseId && Request.QueryString["type"] == "add") {
                 <div>
