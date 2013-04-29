@@ -21,7 +21,7 @@
     var passwordInput = "";
     var errorMessage = "";
     var redirect = "~/dashboard.cshtml";
-        
+    
     Validation.RequireField("username", "You must enter a username!");
     Validation.RequireField("password", "You must enter a password!"); 
     if (Session["id"] != null) {
@@ -75,12 +75,12 @@
             <div>
                 <table class="invisborder">
                     <tr>
-                        <td>Username:</td>
-                        <td><input type="text" name="username" autofocus="true"></td>
+                        <td align="right">Username:</td>
+                        <td><input type="text" name="username" class="text" autofocus="true"></td>
                     </tr>
                     <tr>
-                        <td>Password:</td>
-                        <td><input type="password" name="password"></td>
+                        <td align="right">Password:</td>
+                        <td><input type="password" class="text" name="password"></td>
                     </tr>
                     <tr>
                         <td></td>

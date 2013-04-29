@@ -16,6 +16,9 @@ div {
     padding:1em;
     box-shadow: 5px 5px 10px #888888;
 }
+input.text {
+    width: 12em;
+}
 table, th, td {
     border-collapse: collapse;
     padding: 10px;
