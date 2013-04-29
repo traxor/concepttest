@@ -460,6 +460,7 @@
                                     </td>
                                 </tr>
                             </table>
+                            <hr>
                         }
                     }
                     else {
@@ -475,7 +476,7 @@
                     Response.Redirect(redirectLogin);
                 }
             }
-            <hr>
+            
             <p><a href="~/dashboard.cshtml">Back to Dashboard</a></p>
             <p><a href="~/logout.cshtml">Log out</a></p>
         </div>
@@ -483,3 +484,8 @@
     </body>
 </html>
 
+@{
+    if(db!=null) {
+        db.Close();
+    }
+}
