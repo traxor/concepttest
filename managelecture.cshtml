@@ -12,9 +12,9 @@
         int userId = (int)(Session["id"]);
     
         if(Request.QueryString["type"] == "add") {
-            Validation.RequireField("course_name", "You must select a Course");
-            Validation.RequireField("date", "You must submit a Date");
-            Validation.RequireField("password", "You must submit a Password");
+            Validation.RequireField("course_name", "You must select a course");
+            Validation.RequireField("date", "You must submit a date");
+            Validation.RequireField("password", "You must submit a password");
         }
         
 
@@ -51,14 +51,14 @@
                     <p>Date: @dateInput</p>
                     <p>Password: @passwordInput</p>
                     <h2>@successMessage</h2>
-                    <p><a href="managelecture.cshtml">Add another Lecture</a></p>
+                    <p><a href="managelecture.cshtml">Add another lecture</a></p>
                 </div>
             }
             else {
                 
                     <div>
                         <form method="post" action="?type=add">
-                        <h1>Add Lecture</h1>
+                        <h1>Add lecture</h1>
                         <hr>
                         <table class="invisborder">
                             <tr>
