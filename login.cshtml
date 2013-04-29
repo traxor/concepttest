@@ -33,7 +33,6 @@
         passwordInput = Request.Form["password"];
         var db = Database.Open("102547-concepttest");
         string pwhash = CreateSHAHash(CreateSHAHash(passwordInput, "hej"), usernameInput);
-        //string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
         var checkInput = db.QueryValue("SELECT COUNT(*) FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
         if(checkInput != 0) {
             int time = 0;
