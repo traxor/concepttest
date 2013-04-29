@@ -1,5 +1,7 @@
 ﻿@using System.Text.RegularExpressions;
 @using System.Security.Cryptography;
+@using System.Xml;
+
 @functions{
 
     public static string CreateSHAHash(string Password, string Salt)
@@ -20,6 +22,7 @@
     var usernameInput = "";
     var passwordInput = "";
     var errorMessage = "";
+    var error = "";
     var redirect = "~/dashboard.cshtml";
     
     Validation.RequireField("username", "You must enter a username!");
@@ -33,17 +36,28 @@
         passwordInput = Request.Form["password"];
         var db = Database.Open("102547-concepttest");
         string pwhash = CreateSHAHash(CreateSHAHash(passwordInput, "hej"), usernameInput);
-        //string pwhash = FormsAuthentication.HashPasswordForStoringInConfigFile(passwordInput, "sha1");
         var checkInput = db.QueryValue("SELECT COUNT(*) FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
         if(checkInput != 0) {
             int time = 0;
-            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(Server.MapPath("~/settings.xml"));
-            while (reader.Read()) {
-                if (reader.NodeType == System.Xml.XmlNodeType.Element && reader.Name == "sessiontime") {
-                    time = int.Parse(reader.GetAttribute(0));
+            try {
+                System.Xml.XmlReader reader = System.Xml.XmlReader.Create(Server.MapPath("~/settings.xml"));
+                while (reader.Read()) {
+                    if (reader.Name == "session_time") {
+                        while (reader.NodeType != XmlNodeType.EndElement) {
+                            reader.Read();
+                            if (reader.NodeType == XmlNodeType.Text) {
+                                time = int.Parse(reader.Value);
+                            }
+                        }
+                    }
                 }
+                reader.Close();
             }
-            reader.Close();
+            catch {
+                error = "Xml error";    
+            }
+           
+
             int userId = db.QueryValue("SELECT id FROM T_User WHERE username = @0 AND password = @1", usernameInput, pwhash);
             Session["id"] = userId;
             Session.Timeout = time;
