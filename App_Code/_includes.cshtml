@@ -16,9 +16,9 @@
 
     if (Session["id"] != null) {
 
-        addCourseLink = "/addcourse.cshtml";
-        addLectureLink = "/addlecture.cshtml";
-        addQuestionLink = "/addquestion.cshtml";
+        addCourseLink = "/managecourse.cshtml";
+        addLectureLink = "/managelecture.cshtml";
+        addQuestionLink = "/managequestion.cshtml";
         statisticsLink = "/statistics.cshtml";
         searchTagsLink = "/searchtags.cshtml";
         settingsLink  = "/settings.cshtml";
@@ -37,30 +37,30 @@
         Response.Redirect(redirectLogin);
     }
     <div>
-        <h1>Dashboard</h1>
+        <h2>Dashboard</h2>
         <hr>
-        <h3>Welcome @getName!</h3>
-        <p>logged in as <i>@getUsername</i></p>
-            
-        <a href="@addCourseLink">Manage course</a>
-        <br/>
-        <a href="@addLectureLink">Manage lecture</a>
-        <br/>
-        <a href="@addQuestionLink">Manage question</a>
-        <br/>
-        <a href="@statisticsLink">Statistics</a>
-        <br/>
-        <a href="@searchTagsLink">Search question by tags</a>
+        <p><b>Welcome @getName!</b> logged in as <i>@getUsername</i></p>
+        <table><tr>
+
+        <td><a href="@addCourseLink">Manage course</a></td>
+        
+        <td><a href="@addLectureLink">Manage lecture</a></td>
+        
+        <td><a href="@addQuestionLink">Manage question</a></td>
+        
+        <td><a href="@statisticsLink">Statistics</a></td>
+        
+        <td><a href="@searchTagsLink">Search question by tags</a></td>
 
         @{ 
             if (admin == true) {
-                <br/>
-                <a href="@addUserLink">Add User</a>
-                <br/>
-                <a href="@settingsLink">Settings</a>
+                
+                <td><a href="@addUserLink">Add User</a></td>
+                
+                <td><a href="@settingsLink">Settings</a></td>
             }
         }
-        <br/>
+        </tr></table>
         <p><a href="@logoutLink">Logout</a></p>
     </div>
 }
