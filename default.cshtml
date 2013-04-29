@@ -134,7 +134,6 @@
                                         else {
                                             <p><input type="radio" name="question-@question.id" value="@answer.id"> @answer.answer</p>
                                         }
-                                        //<p><input type="radio" name="question-@question.id" value="@answer.id"> @answer.answer</p>
                                     }
                                 
                                     if(IsPost && hasAnsweredAllQuestions == "1" && Request.Cookies["studentCookie-" + Request.QueryString["lecture"]] == null) {
@@ -162,7 +161,6 @@
                                             <p>For question @question.id you answered: @answer</p>
                                             foreach(string word in answers) {
                                                 try {
-                                                    //<p>@word</p>
                                                     var insertCommand = "INSERT INTO T_Statistics (question_id, answer_id, lecture_id) VALUES(@0, @1, @2)";
                                                     db.Execute(insertCommand, @question.id, word, Request.QueryString["lecture"]);
                                                 }
@@ -179,9 +177,7 @@
                             }
                             @if(hasAnsweredAllQuestions == "1") {
                                 HttpCookie studentCookie = new HttpCookie("studentCookie-" + Request.QueryString["lecture"]);
-                                //studentCookie.Values.Add("lecture", Request.QueryString["lecture"]);
                                 studentCookie.Values["lecture"] = Request.QueryString["lecture"];
-                                //studentCookie.Values.Add("timeSubmitted", DateTime.Now.ToString());
                                 studentCookie.Values["timeSubmitted"] = DateTime.Now.ToString();
                                 studentCookie.Expires = DateTime.Now.AddMinutes(2);
                                 Response.Cookies.Add(studentCookie);
@@ -220,6 +216,9 @@
         </div>
     </body>
 </html>
+
 @{
-    db.Close();
+    if(db!=null) {
+        db.Close();
+    }
 }
