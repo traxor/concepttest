@@ -33,19 +33,26 @@
     }
 
     Validation.RequireField("session_time", "You must submit a number between 1 and 1440.");
+    
 
     if (IsPost && Validation.IsValid()) {
-        try {
-            time = Request.Form["session_time"];
-            var doc = XDocument.Load(Server.MapPath("~/settings.xml"));
-            doc.XPathSelectElement("//settings")
-            .Element("session_time").Value = time;
-            doc.Save(Server.MapPath("~/settings.xml"));
-            successMessage = "Settings saved.";
+        if(int.Parse(Request.Form["session_time"]) <= 1440 && int.Parse(Request.Form["session_time"]) >= 1) {
+            try {
+                time = Request.Form["session_time"];
+                var doc = XDocument.Load(Server.MapPath("~/settings.xml"));
+                doc.XPathSelectElement("//settings")
+                .Element("session_time").Value = time;
+                doc.Save(Server.MapPath("~/settings.xml"));
+                successMessage = "Settings saved.";
+            }
+            catch {
+                successMessage = "Write to Xml Error.";
+            } 
         }
-        catch {
-            successMessage = "Write to Xml Error.";
+        else {
+            errorMessage = "Invalid input, number between 1 and 1440.";
         }
+       
     }
     try {
             System.Xml.XmlReader reader = System.Xml.XmlReader.Create(Server.MapPath("~/settings.xml"));
@@ -103,6 +110,7 @@
                 </table>
                 </form>
             <p>@successMessage</p>
+            <p>@errorMessage</p>
             <hr>
             <p><a href="dashboard.cshtml">Back to dashboard</a></p>
             </div>

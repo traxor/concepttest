@@ -14,7 +14,7 @@
                                 + "GROUP BY T_Answer.answer", Request.QueryString["question"]);
 
     if (Request.QueryString["type"] == "singleQuestion") {
-        var statsChart = new Chart(width: 600, height: 400) 
+        var statsChart = new Chart(width: 300, height: 200) 
             .AddTitle("Answers")
             .AddSeries(chartType:"column",
                 xValue: singleQuestion, xField: "answer",
@@ -24,7 +24,7 @@
     }
 
      if (Request.QueryString["type"] == "lectureQuestion") {
-        var statsChart = new Chart(width: 600, height: 400) 
+        var statsChart = new Chart(width: 300, height: 200) 
             .AddTitle("Answers")
             .AddSeries(chartType:"column",
                 xValue: lectureQuestion, xField: "answer",
