@@ -40,7 +40,7 @@
     <head>
         <meta charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="StyleSheet.css">
-        <title>Manage Lecture</title>
+        <title>Manage lecture</title>
     </head>
     <body>
         @_includes.dashboard()
@@ -65,7 +65,7 @@
                                 <td align="right">Course name:</td>
                                 <td>
                                 <select id="course_name" name="course_name">
-                                        <option value="">-- Select Course --</option>                              
+                                        <option value="">-- Select course --</option>                              
                                         @foreach(var category in selected) {
                                             if(Request.Form["course_name"] == category.id.ToString()) {
                                                 <option value="@category.id" selected>@category.course_id @category.course_name</option>
