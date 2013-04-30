@@ -96,6 +96,10 @@
             course = Request.Form["categoryId"];
             var selectedlectures = db.Query(selectcommand, course);
             courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", course);
+
+            course = Request.Form["seletedquestion"];
+            var selectedlecturesoldquestion = db.Query(selectcommand, course);
+            
             
             if(IsPost && !Request["Submit"].IsEmpty() && Validation.IsValid() && successMessage != "") {
                 <div>
@@ -159,42 +163,152 @@
                         <p><input type="Submit" name="Submit" value="Submit" /><input type="hidden" id="counter" name="counter" value="0"/></p>            
                         <p><a href="dashboard.cshtml">Back to dashboard</a></p>
                     </div>
-                    <div id="test">
-                        @{
-                            var search = "";
-                            var searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
+                    
+                    @{
+                        //Some code for the search, add and remove old question section
 
-                            var data = db.Query(searchphrase, "%" + search + "%");
-                            var grid = new WebGrid(source: data, rowsPerPage: 5);
+                        var search = "";
+                        var searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
 
-                            if(IsPost && !Request["oldquestion"].IsEmpty())
-                            {
-                                search = Request.Form["searchphrase"];
-                                data = db.Query(searchphrase, "%" + search + "%");
-                                grid = new WebGrid(source: data, rowsPerPage: 5);
-                            }
+                        var data = db.Query(searchphrase, "%" + search + "%");
+                        var grid = new WebGrid(source: data, rowsPerPage: 5);
 
-                            if(IsPost && !Request["addoldquestion"].IsEmpty())
-                            {
-                                var addoldquestion = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
-                                db.Execute(addoldquestion, Request.Form["oldquestions"], Request.Form["lectures"]);
-                            }
-
+                        if(IsPost && !Request["oldquestion"].IsEmpty())
+                        {
+                            search = Request.Form["searchphrase"];
+                            data = db.Query(searchphrase, "%" + search + "%");
+                            grid = new WebGrid(source: data, rowsPerPage: 5);
                         }
-                        <form method="get" id="Search">
-                            <h1>Search old questions</h1>
-                            <input type="text" name="searchphrase" value="" />
-                            <input type="Submit" name="oldquestion" value="Search"/>
-                            <p>
-                            <select id="oldquestions" name="oldquestions">
-                                <option value="" disabled>-- Select question --</option>
-                                @foreach(var matchingquestions in data) {
-                                    <option value="@matchingquestions.id">@matchingquestions.question</option>
-                                }
-                            </select>
-                            <input type="Submit" name="addoldquestion" value="Add to lecture" />
+
+                        if(IsPost && !Request["addoldquestion"].IsEmpty())
+                        {
+                            Validation.RequireField("selectquestion", "You must select a Course");
+                            Validation.RequireField("lecturesoldquestion", "You must select a Lecture");
+
+                            if(Validation.IsValid()){
+                                var addoldquestion = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
+                                db.Execute(addoldquestion, Request.Form["oldquestions"], Request.Form["lecturesoldquestion"]);
+                            }
+                        }
+
+                        if(IsPost && !Request["deletequestion"].IsEmpty())
+                        {
+                            var removeCommand = "DELETE FROM T_Question WHERE T_Question.id = @0";
+                            var removeRelation = "DELETE FROM T_Question_Lecture WHERE question_id = @0";
+                            var removeAnswers = "DELETE FROM T_Answer where question_id = @0";
+                            var questionid = Request.Form["removequestion"];
+
+                            db.Execute("START TRANSACTION");
+                               db.Execute(removeRelation, questionid);
+                               db.Execute(removeCommand, questionid);
+                               db.Execute(removeAnswers, questionid);
+                            db.Execute("COMMIT");
+                        }
+
+                    }
+
+                    <div id="existingquestion">
+                        <h1>Use existing question</h1>
+                        <hr>
+                        <table class="invisborder">
+                            <tr>
+                                <td>
+                                        <input type="text" name="searchphrase" value="" />
+                                        <input type="Submit" name="oldquestion" value="Search"/>
+                                </td>
+                            <tr>
+                                <td>
+                                    Matching Questions:
+                                            <select id="oldquestions" name="oldquestions">
+                                                <option value="" disabled>-- Select question --</option>
+                                                @foreach(var matchingquestions in data) {
+                                                    <option value="@matchingquestions.id">@matchingquestions.question</option>
+                                                }
+                                            </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="selectquestion" name="selectquestion" onchange="updatelectures()">
+                                                <option value="">-- Select course --</option>
+                                                @foreach(var category in selected) {
+                                                    if(Request.Form["selectquestion"] == category.id.ToString()) {
+                                                        <option value="@category.id" selected>@category.course_name</option>
+                                                    }
+                                                    else {
+                                                        <option value="@category.id">@category.course_name</option>
+                                                    }
+                                                }
+                                    </select>
+                                    @Html.ValidationMessage("selectquestion")
+                                </td>
+                            </tr>
+                            @{
+                                course = Request.Form["selectquestion"];
+                                selectedlecturesoldquestion = db.Query(selectcommand, course);
+                            }
+                            <tr>
+                                <td>
+                                    <select id="lecturesoldquestion" name="lecturesoldquestion">
+                                                <option value="">-- Select lecture --</option>
+                                                @foreach(var matchinglectures in selectedlecturesoldquestion) {
+                                                    if(Request.Form["lecturesoldquestion"] == matchinglectures.id.ToString()){
+                                                        <option value="@matchinglectures.id" selected>@matchinglectures.date</option>
+                                                    }
+                                                    else{
+                                                        <option value="@matchinglectures.id">@matchinglectures.date</option>
+                                                    }
+                                                }
+                                    </select>
+                                    @Html.ValidationMessage("lecturesoldquestion")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="Submit" name="addoldquestion" value="Add to lecture" />
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                </form>
+
+                    @{
+                        search = "";
+                        searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 AND T_Question.creator_id = @1";
+
+                        var removedata = db.Query(searchphrase, "%" + search + "%", Session["id"]);
+                    }
+                    <div id="removequestion">
+                        <h1>Remove old Questions</h1>
+                        <hr>
+                        <table class="invisborder">
+                            <tr>
+                                <td>
+                                        <input type="text" name="removesearchphrase" value="" />
+                                        <input type="Submit" name="removeoldquestion" value="Search"/>
+                                </td>
+                            <tr>
+                                <td>
+                                    (Only questions created by yourself are visable)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Matching Questions:
+                                            <select id="removequestion" name="removequestion">
+                                                <option value="" disabled>-- Select question --</option>
+                                                @foreach(var matchingquestions in removedata) {
+                                                    <option value="@matchingquestions.id">@matchingquestions.question</option>
+                                                }
+                                            </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="Submit" name="deletequestion" value="Remove selected question" />
+                                </td>
+                            </tr>
+                    </div>
+                    </form>
             }
         }
     </body>

@@ -67,7 +67,7 @@ function removeform(){
 
 function updatelectures() {
 
-    var lectures = document.getElementById("lectures");
+    //var lectures = document.getElementById("lectures");
     document.forms["Submit"].submit();
 }
      
