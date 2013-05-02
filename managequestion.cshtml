@@ -17,7 +17,7 @@
     var lectureOutput = "";
     var successMessage = "";
     
-    var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0";
+    var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0 ORDER BY date";
     var addcommand = "INSERT INTO T_Question (question, tags, creator_id) Values (@0, @1, @2)";
     var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
     var addanswer = "INSERT INTO T_Answer (question_id, answer, correct) Values (@0, @1, @2)";
@@ -274,6 +274,7 @@
                     @{
                         search = "";
                         searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 AND T_Question.creator_id = @1";
+                        search = Request.Form["removesearchphrase"];
 
                         var removedata = db.Query(searchphrase, "%" + search + "%", Session["id"]);
                     }
