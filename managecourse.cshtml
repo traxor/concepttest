@@ -96,17 +96,23 @@
                     if(IsPost && Request.Form["removeCourse"] != null && Request.QueryString["type"] == "remove") {
                         var removeCourse = "DELETE FROM T_Course WHERE T_Course.id = @0";
                         var removeLecturesInCourse = "DELETE FROM T_Lecture WHERE T_Lecture.course_id = @0";
+                        var removeStatisticsForLectureInCourse = "DELETE T_Statistics FROM T_Statistics, T_Lecture WHERE T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = @0";
+                        var removeQuestionLectureKey = "DELETE T_Question_Lecture FROM T_Question_Lecture, T_Lecture WHERE T_Question_Lecture.lecture_id = T_Lecture.id AND T_Lecture.course_id = @0";
+                        var course_id = Request.Form["removeCourse"];
                         try {
-                            db.Execute("start transaction");
-                            db.Execute(removeCourse, Request.Form["removeCourse"]);
-                            db.Execute(removeLecturesInCourse, Request.Form["removeCourse"]);
-                            db.Execute("commit");  
+                            db.Execute("START TRANSACTION");
+                            db.Execute(removeQuestionLectureKey, course_id);
+                            db.Execute(removeStatisticsForLectureInCourse, course_id);
+                            db.Execute(removeLecturesInCourse, course_id);
+                            db.Execute(removeCourse, course_id);
+                            db.Execute("COMMIT");  
+                            successMessage = "Successfully removed " + Request.Form["removeCourse"] + " from database!";
                         }
-                        catch {
-                            successMessage = "Error";
+                        catch (Exception e) {
+                            successMessage = "Error: " + e.ToString();
                         }
                           
-                        successMessage = "Successfully removed " + Request.Form["removeCourse"] + " from database!";
+                        
                     }
                     var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0", Session["id"]);
                     if(getCourses.Count() > 0) {
