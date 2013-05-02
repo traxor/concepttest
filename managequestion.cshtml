@@ -180,13 +180,11 @@
                         var searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
 
                         var data = db.Query(searchphrase, "%" + search + "%");
-                        var grid = new WebGrid(source: data, rowsPerPage: 5);
 
                         if(IsPost && !Request["oldquestion"].IsEmpty())
                         {
                             search = Request.Form["searchphrase"];
                             data = db.Query(searchphrase, "%" + search + "%");
-                            grid = new WebGrid(source: data, rowsPerPage: 5);
                         }
 
                         if(IsPost && !Request["addoldquestion"].IsEmpty())
@@ -208,12 +206,14 @@
                                 var removeCommand = "DELETE FROM T_Question WHERE T_Question.id = @0";
                                 var removeRelation = "DELETE FROM T_Question_Lecture WHERE question_id = @0";
                                 var removeAnswers = "DELETE FROM T_Answer where question_id = @0";
+                                var removeStatistics = "DELETE FROM T_Statistics where question_id = @0";
                                 var questionid = Request.Form["removequestion"];
 
                                     db.Execute("START TRANSACTION");
                                        db.Execute(removeRelation, questionid);
                                        db.Execute(removeCommand, questionid);
                                        db.Execute(removeAnswers, questionid);
+                                       db.Execute(removeStatistics, questionid);
                                     db.Execute("COMMIT");
                             }
                         }
