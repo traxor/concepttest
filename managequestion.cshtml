@@ -29,7 +29,16 @@
     {
         Validation.RequireField("categoryId", "You must select a Course");
         Validation.RequireField("lectures", "You must select a Lecture");
-        Validation.RequireField("Question", "You must submit a Question");
+
+        Validation.Add("Tags",
+            Validator.StringLength(50, 0, "No more than 50 letters")
+        );
+
+        Validation.Add("Question", 
+            Validator.Required("You must submit a Question"), 
+            Validator.StringLength(50, 0, "No more than 50 letters")
+        );
+
         lectureId = Request.Form["lectures"];
         lectureOutput = db.QueryValue("SELECT date FROM T_Lecture WHERE id = @0", lectureId);
 
@@ -153,7 +162,7 @@
                             </tr>
                             <tr>
                                 <td>Tags (optional):</td> 
-                                <td><input type="text" name="Tags" size="16" /></td>
+                                <td><input type="text" name="Tags" size="16" /> @Html.ValidationMessage("Tags")</td>
                                 <td></td>
                                 <td></td>
                             </tr>
@@ -193,18 +202,21 @@
 
                         if(IsPost && !Request["deletequestion"].IsEmpty())
                         {
-                            var removeCommand = "DELETE FROM T_Question WHERE T_Question.id = @0";
-                            var removeRelation = "DELETE FROM T_Question_Lecture WHERE question_id = @0";
-                            var removeAnswers = "DELETE FROM T_Answer where question_id = @0";
-                            var questionid = Request.Form["removequestion"];
+                            Validation.RequireField("removequestion", "You must select a Question");
 
-                            db.Execute("START TRANSACTION");
-                               db.Execute(removeRelation, questionid);
-                               db.Execute(removeCommand, questionid);
-                               db.Execute(removeAnswers, questionid);
-                            db.Execute("COMMIT");
+                            if(Validation.IsValid()){
+                                var removeCommand = "DELETE FROM T_Question WHERE T_Question.id = @0";
+                                var removeRelation = "DELETE FROM T_Question_Lecture WHERE question_id = @0";
+                                var removeAnswers = "DELETE FROM T_Answer where question_id = @0";
+                                var questionid = Request.Form["removequestion"];
+
+                                    db.Execute("START TRANSACTION");
+                                       db.Execute(removeRelation, questionid);
+                                       db.Execute(removeCommand, questionid);
+                                       db.Execute(removeAnswers, questionid);
+                                    db.Execute("COMMIT");
+                            }
                         }
-
                     }
 
                     <div id="existingquestion">
@@ -279,7 +291,7 @@
                         var removedata = db.Query(searchphrase, "%" + search + "%", Session["id"]);
                     }
                     <div id="removequestion">
-                        <h1>Remove old Questions</h1>
+                        <h1>Remove old questions</h1>
                         <hr>
                         <table class="invisborder">
                             <tr>
@@ -296,11 +308,12 @@
                                 <td>
                                     Matching Questions:
                                             <select id="removequestion" name="removequestion">
-                                                <option value="" disabled>-- Select question --</option>
+                                                <option value="">-- Select question --</option>
                                                 @foreach(var matchingquestions in removedata) {
                                                     <option value="@matchingquestions.id">@matchingquestions.question</option>
                                                 }
                                             </select>
+                                            @Html.ValidationMessage("removequestion")
                                 </td>
                             </tr>
                             <tr>
