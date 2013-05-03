@@ -191,10 +191,16 @@
                         {
                             Validation.RequireField("selectquestion", "You must select a Course");
                             Validation.RequireField("lecturesoldquestion", "You must select a Lecture");
+                            var control = "SELECT COUNT(*) FROM T_Question_Lecture WHERE question_id = @0 AND lecture_id = @1";
 
                             if(Validation.IsValid()){
-                                var addoldquestion = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
-                                db.Execute(addoldquestion, Request.Form["oldquestions"], Request.Form["lecturesoldquestion"]);
+
+                                if(0==(int)db.QueryValue(control, Request.Form["oldquestions"], Request.Form["lecturesoldquestion"])){
+                                    var addoldquestion = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
+                                    db.Execute(addoldquestion, Request.Form["oldquestions"], Request.Form["lecturesoldquestion"]);
+                                }else{
+                                    Validation.AddFormError("The question already exist in this lecture");
+                                }
                             }
                         }
 
@@ -252,6 +258,7 @@
                                                     }
                                                 }
                                     </select>
+                                    <!--@Html.ValidationSummary()-->
                                     @Html.ValidationMessage("selectquestion")
                                 </td>
                             </tr>
