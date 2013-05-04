@@ -27,7 +27,7 @@
     
     if(IsPost && !Request["Submit"].IsEmpty())
     {
-        Validation.RequireField("categoryId", "You must select a Course");
+        Validation.RequireField("courses", "You must select a Course");
         Validation.RequireField("lectures", "You must select a Lecture");
 
         Validation.Add("Tags",
@@ -102,14 +102,16 @@
         @{
             //After the page reloads and a course was selected the dropdownlist containing lectures is filled with the course variable
 
-            course = Request.Form["categoryId"];
+            //Fill the first dropdownmenu with the matching lectures of the selected course
+            course = Request.Form["courses"];
             var selectedlectures = db.Query(selectcommand, course);
             courseNameOutput = db.QueryValue("SELECT course_name FROM T_Course WHERE id = @0", course);
 
+            //Fill the second dropdownmenu
             course = Request.Form["seletedquestion"];
             var selectedlecturesoldquestion = db.Query(selectcommand, course);
             
-            
+            //If a question was successfully added, show the confirmation page otherwise the regular one
             if(IsPost && !Request["Submit"].IsEmpty() && Validation.IsValid() && successMessage != "") {
                 <div>
                     <p>Course: @courseNameOutput</p>
@@ -120,26 +122,26 @@
                 </div>
             }else {
                 <form method="post" id="Submit">
-                    <div id="mydiv">
+                    <div>
                         <h1>Add question</h1>
                         <hr>
-                        <p>
+                        <br>
                         <table class="invisborder">
                             <tr>
-                                <td align="left">Course:</td>
+                                <td>Course:</td>
                                 <td>
-                                    <select id="categoryId" name="categoryId" onchange="updatelectures()">
+                                    <select id="courses" name="courses" onchange="updatelectures()">
                                         <option value="">-- Select course --</option>
-                                        @foreach(var category in selected) {
-                                            if(Request.Form["categoryId"] == category.id.ToString()) {
-                                                <option value="@category.id" selected>@category.course_name</option>
+                                        @foreach(var choice in selected) {
+                                            if(Request.Form["courses"] == choice.id.ToString()) {
+                                                <option value="@choice.id" selected>@choice.course_name</option>
                                             }
                                             else {
-                                                <option value="@category.id">@category.course_name</option>
+                                                <option value="@choice.id">@choice.course_name</option>
                                             }
                                         }
                                     </select>
-                                    @Html.ValidationMessage("categoryId")
+                                    @Html.ValidationMessage("courses")
                                 </td>
                                 </tr>
                             <tr>
@@ -157,22 +159,19 @@
                             <tr>
                                 <td>Question:</td> 
                                 <td><input type="text" name="Question" size="16"/> @Html.ValidationMessage("Question")</td>
-                                <td></td>
-                                <td></td>
                             </tr>
                             <tr>
                                 <td>Tags (optional):</td> 
                                 <td><input type="text" name="Tags" size="16" /> @Html.ValidationMessage("Tags")</td>
-                                <td></td>
-                                <td></td>
                             </tr>
                         </table>
+
                         <p>Number of answers (max 10):<input type="button" name="addanswer" value="+" onclick="addform()" /> <input type="button" name="removeanswer" value="-" onclick="removeform()" /></p>
                         <p id="answerfield"></p>
+                        
                         <p><input type="Submit" name="Submit" value="Submit" /><input type="hidden" id="counter" name="counter" value="0"/></p>            
                         <p><a href="dashboard.cshtml">Back to dashboard</a></p>
                     </div>
-                    
                     @{
                         //Some code for the search, add and remove old question section
 
@@ -181,11 +180,9 @@
 
                         var data = db.Query(searchphrase, "%" + search + "%");
 
-                        if(IsPost && !Request["oldquestion"].IsEmpty())
-                        {
-                            search = Request.Form["searchphrase"];
-                            data = db.Query(searchphrase, "%" + search + "%");
-                        }
+                        search = Request.Form["searchphrase"];
+                        data = db.Query(searchphrase, "%" + search + "%");
+                        
 
                         if(IsPost && !Request["addoldquestion"].IsEmpty())
                         {
@@ -216,18 +213,19 @@
                                 var questionid = Request.Form["removequestion"];
 
                                     db.Execute("START TRANSACTION");
-                                       db.Execute(removeRelation, questionid);
-                                       db.Execute(removeCommand, questionid);
-                                       db.Execute(removeAnswers, questionid);
-                                       db.Execute(removeStatistics, questionid);
+                                        db.Execute(removeRelation, questionid);
+                                        db.Execute(removeCommand, questionid);
+                                        db.Execute(removeAnswers, questionid);
+                                        db.Execute(removeStatistics, questionid);
                                     db.Execute("COMMIT");
                             }
                         }
                     }
-
-                    <div id="existingquestion">
+                    
+                    <div>
                         <h1>Use existing question</h1>
                         <hr>
+                        <br>
                         <table class="invisborder">
                             <tr>
                                 <td>
@@ -249,16 +247,16 @@
                                 <td>
                                     <select id="selectquestion" name="selectquestion" onchange="updatelectures()">
                                                 <option value="">-- Select course --</option>
-                                                @foreach(var category in selected) {
-                                                    if(Request.Form["selectquestion"] == category.id.ToString()) {
-                                                        <option value="@category.id" selected>@category.course_name</option>
+                                                @foreach(var choice in selected) {
+                                                    if(Request.Form["selectquestion"] == choice.id.ToString()) {
+                                                        <option value="@choice.id" selected>@choice.course_name</option>
                                                     }
                                                     else {
-                                                        <option value="@category.id">@category.course_name</option>
+                                                        <option value="@choice.id">@choice.course_name</option>
                                                     }
                                                 }
                                     </select>
-                                    <!--@Html.ValidationSummary()-->
+                                    @Html.ValidationSummary()
                                     @Html.ValidationMessage("selectquestion")
                                 </td>
                             </tr>
@@ -289,7 +287,6 @@
                             </tr>
                         </table>
                     </div>
-
                     @{
                         search = "";
                         searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 AND T_Question.creator_id = @1";
@@ -328,8 +325,9 @@
                                     <input type="Submit" name="deletequestion" value="Remove selected question" />
                                 </td>
                             </tr>
+                        </table>
                     </div>
-                    </form>
+                </form>
             }
         }
     </body>

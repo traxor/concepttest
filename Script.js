@@ -2,7 +2,7 @@ var i = 0;
 var j = 10;
 
 /*This function could probably be improved*/
-function addform() {
+function addform(){
     
     if (i > 9)
         return;
@@ -21,10 +21,10 @@ function addform() {
     correcttext.innerHTML = " Correct: ";
 
     var newrow = document.createElement("text");
-    newrow.innerHTML = "<br/>";
+    newrow.innerHTML = "<br>";
 
     var Answer = document.createElement("input");
-    Answer.type = "text"
+    Answer.type = "text";
     Answer.id = i;
     Answer.name = i;
     Answer.value = "";
@@ -65,9 +65,6 @@ function removeform(){
     }
 }
 
-function updatelectures() {
-
-    //var lectures = document.getElementById("lectures");
+function updatelectures(){
     document.forms["Submit"].submit();
 }
-     
