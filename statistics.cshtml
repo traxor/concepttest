@@ -34,7 +34,7 @@
                 if (Session["id"] != null) {
                     if(Request.QueryString["course"] != null) {
                         var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
-                        var selectedLecture = db.Query("SELECT id, date FROM T_Lecture WHERE course_id = @0", selectedData.id);
+                        var selectedLecture = db.Query("SELECT id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE course_id = @0", selectedData.id);
                         var numberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer, T_Lecture, T_Course WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = true AND T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = T_Course.id AND T_Course.course_id = @0", Request.QueryString["course"]);
                         var numberOfAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Statistics, T_Lecture, T_Course WHERE T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = T_Course.id AND T_Course.course_id = @0", Request.QueryString["course"]);
                         float percent = ((float)numberOfCorrectAnswers/(float)numberOfAnswers)*100;
@@ -66,7 +66,7 @@
                     }
                     else if (Request.QueryString["lecture"] != null && Request.QueryString["question"] == null) {
                         var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
-                        var lecture = db.QuerySingle("SELECT T_Lecture.date, T_Lecture.id FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
+                        var lecture = db.QuerySingle("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date, T_Lecture.id FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
                         var questions = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
                         var numberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = true AND T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
                         var numberOfAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Statistics WHERE T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
@@ -104,7 +104,7 @@
                     }
                     else if (Request.QueryString["question"] != null && Request.QueryString["lecture"] != null) {
                         var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id INNER JOIN T_Question_Lecture ON T_Lecture.id = T_Question_Lecture.lecture_id WHERE T_Question_Lecture.question_id = @0", Request.QueryString["question"]);
-                        var lecture = db.QuerySingle("SELECT T_Lecture.date FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
+                        var lecture = db.QuerySingle("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
                         var question = db.QuerySingle("SELECT T_Question.question FROM T_Question WHERE T_Question.id = @0", Request.QueryString["question"]);
                         var correctAnswer = db.Query("SELECT T_Answer.answer FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
                         var correctAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
@@ -182,7 +182,7 @@
                             }
                         }
                         <hr>
-                        var getLecture = db.QuerySingle("SELECT T_Lecture.date FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
+                        var getLecture = db.QuerySingle("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
                         <p><a href="?lecture=@Request.QueryString["lecture"]">Back to lecture @getLecture.date</a></p>
                     }
                     else if (Request.QueryString["question"] != null && Request.QueryString["type"] == "1") {
@@ -262,21 +262,32 @@
                         <p><a href="~/searchtags.cshtml">Back to search questions by tags</a></p>
                     }
                     else if (Request.QueryString["question"] != null && Request.QueryString["type"] == "2") {
-                        var lecturesWithThisQuestion = db.Query("SELECT T_Lecture.date, T_Lecture.id FROM T_Lecture, T_Question_Lecture WHERE T_Question_Lecture.question_id = @0 AND T_Question_Lecture.lecture_id = T_Lecture.id", Request.QueryString["question"]);
+                        var lecturesWithThisQuestion = db.Query("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date, T_Lecture.id FROM T_Lecture, T_Question_Lecture WHERE T_Question_Lecture.question_id = @0 AND T_Question_Lecture.lecture_id = T_Lecture.id", Request.QueryString["question"]);
                         <form method="post">
                             <table>
                                 <tr>
                                     <td>Lecture 1:<br/>
                                     <select name="lecture1">
                                         @foreach (var lecture in lecturesWithThisQuestion) {
-                                            <option value="@lecture.id">@lecture.date</option>
+                                            if(IsPost && Request.Form["lecture1"] == lecture.id.ToString()) {
+                                                <option value="@lecture.id" selected>@lecture.date</option>
+                                            }
+                                            else {
+                                                <option value="@lecture.id">@lecture.date</option>
+                                            }
                                         }
                                     </select>
                                     </td>
                                     <td>Lecture 2:<br/>
                                     <select name="lecture2">
                                         @foreach (var lecture in lecturesWithThisQuestion) {
-                                            <option value="@lecture.id">@lecture.date</option>
+                                            if(IsPost && Request.Form["lecture2"] == lecture.id.ToString()) {
+                                                <option value="@lecture.id" selected>@lecture.date</option>
+                                            }
+                                            else {
+                                                <option value="@lecture.id">@lecture.date</option>
+                                            }
+                                            
                                         }
                                     </select>
                                     </td>
@@ -286,7 +297,7 @@
                         </form>
                         if(IsPost) {
                                 var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id INNER JOIN T_Question_Lecture ON T_Lecture.id = T_Question_Lecture.lecture_id WHERE T_Question_Lecture.question_id = @0", Request.QueryString["question"]);
-                                var lecture = db.QuerySingle("SELECT T_Lecture.date FROM T_Lecture WHERE T_Lecture.id = @0", Request.Form["lecture1"]);
+                                var lecture = db.QuerySingle("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE T_Lecture.id = @0", Request.Form["lecture1"]);
                                 var question = db.QuerySingle("SELECT T_Question.question FROM T_Question WHERE T_Question.id = @0", Request.QueryString["question"]);
                                 var correctAnswer = db.Query("SELECT T_Answer.answer FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
                                 var correctAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
@@ -300,7 +311,7 @@
                                         + "GROUP BY T_Answer.answer", Request.QueryString["question"], Request.Form["lecture1"]);
 
                                 var course2 = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id INNER JOIN T_Question_Lecture ON T_Lecture.id = T_Question_Lecture.lecture_id WHERE T_Question_Lecture.question_id = @0", Request.QueryString["question"]);
-                                var lecture2 = db.QuerySingle("SELECT T_Lecture.date FROM T_Lecture WHERE T_Lecture.id = @0", Request.Form["lecture2"]);
+                                var lecture2 = db.QuerySingle("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE T_Lecture.id = @0", Request.Form["lecture2"]);
                                 var question2 = db.QuerySingle("SELECT T_Question.question FROM T_Question WHERE T_Question.id = @0", Request.QueryString["question"]);
                                 var correctAnswer2 = db.Query("SELECT T_Answer.answer FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
                                 var correctAnswers2 = db.QueryValue("SELECT COUNT(*) FROM T_Answer WHERE T_Answer.question_id = @0 AND T_Answer.correct = 1", Request.QueryString["question"]);
@@ -324,11 +335,11 @@
                                     <table>
                                         <tr>
                                             <th>@course.course_id @course.course_name - @lecture.date</th>
-                                            <th>@course.course_id @course.course_name - @lecture.date</th>
+                                            <th>@course2.course_id @course2.course_name - @lecture2.date</th>
                                         </tr>
                                         <tr>
                                             <td>@question.question</td>
-                                            <td>@question.question</td>
+                                            <td>@question2.question</td>
                                         </tr>
                                         <tr valign="top">
                                             <td>
