@@ -11,16 +11,9 @@
     var dateInput = "";
     var passwordInput = "";
     var successMessage = "";
-<<<<<<< HEAD
-<<<<<<< HEAD
     var dateError = "";
     bool isValid = false;
-=======
     bool admin = false;
->>>>>>> 8ad407b0bdd7a15ba065a44491f0c816284686fe
-=======
-    bool admin = false;
->>>>>>> 8ad407b0bdd7a15ba065a44491f0c816284686fe
 
     var db = Database.Open("102547-concepttest");
     var selected = db.Query("SELECT * FROM T_Course");
@@ -167,7 +160,6 @@
                                             foreach(var lecture in removeLectures) {
                                                 <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
                                             }
-<<<<<<< HEAD
                                         }
                                         <input type="submit" value="Remove">
                                     </form>
@@ -183,15 +175,11 @@
                                             foreach(var lecture in removeLectures) {
                                                 <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
                                             }
-=======
->>>>>>> 8ad407b0bdd7a15ba065a44491f0c816284686fe
                                         }
                                         <input type="submit" value="Remove">
                                     </form>
                                 }
                             }
-<<<<<<< HEAD
-=======
                             if (admin == true) {
                                 var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture");
                                 if(removeLectures.Count() > 0) {
@@ -207,7 +195,6 @@
                                     </form>
                                 }
                             }
->>>>>>> 8ad407b0bdd7a15ba065a44491f0c816284686fe
                         }
                         <hr>
                         <a href="dashboard.cshtml">Back to dashboard</a>
