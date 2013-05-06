@@ -1,5 +1,8 @@
 ﻿@using System.Text.RegularExpressions;
+@using System.Diagnostics;
 @{
+    Stopwatch watch = new Stopwatch();
+    watch.Start();
     //Context.Items.Add("Request_Start_Time", DateTime.Now);
     DateTime startTime = DateTime.Now;
     string u = Request.ServerVariables["HTTP_USER_AGENT"];
@@ -227,9 +230,10 @@
             <a href="login.cshtml">Log in</a>
         </div>
         @{
+            watch.Stop();
             TimeSpan tsDuration = DateTime.Now.Subtract(startTime);
             //Response.Write("This page took " + tsDuration.TotalMilliseconds + " ms to load.");
-            <p>This page took @tsDuration.TotalMilliseconds ms to load.</p>
+            <p>This page took @watch.ElapsedMilliseconds ms to load. (watch)</p>
         }
     </body>
 </html>
