@@ -17,12 +17,21 @@
     var lectureOutput = "";
     var successMessage = "";
     
+    
     var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0 ORDER BY date";
     var addcommand = "INSERT INTO T_Question (question, tags, creator_id) Values (@0, @1, @2)";
     var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
     var addanswer = "INSERT INTO T_Answer (question_id, answer, correct) Values (@0, @1, @2)";
 
     var db = Database.Open("102547-concepttest");
+
+    bool admin = false;
+
+    var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", Session["id"]);
+        if (checkIfAdmin != 0) {
+            admin = true;
+    }
+
     var selected = db.Query("SELECT * FROM T_Course");
     
     if(IsPost && !Request["Submit"].IsEmpty())
@@ -173,7 +182,7 @@
                     </div>
                     @{
                         //Some code for the search, add and remove old question section
-
+                        var alreadyused = "";
                         var search = "";
                         var searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
 
@@ -195,7 +204,7 @@
                                     var addoldquestion = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
                                     db.Execute(addoldquestion, Request.Form["oldquestions"], Request.Form["lecturesoldquestion"]);
                                 }else{
-                                    Validation.AddFormError("The question already exist in this lecture");
+                                    alreadyused = "This question already exist in this lecture";
                                 }
                             }
                         }
@@ -255,7 +264,7 @@
                                                     }
                                                 }
                                     </select>
-                                    @Html.ValidationSummary()
+                                    @alreadyused
                                     @Html.ValidationMessage("selectquestion")
                                 </td>
                             </tr>
@@ -289,9 +298,18 @@
                     @{
                         search = "";
                         searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 AND T_Question.creator_id = @1";
+
+                        if(admin){
+                            searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
+                        }
+
                         search = Request.Form["removesearchphrase"];
 
                         var removedata = db.Query(searchphrase, "%" + search + "%", Session["id"]);
+
+                        if(admin){
+                            removedata = db.Query(searchphrase, "%" + search + "%");
+                        }
                     }
                     <div id="removequestion">
                         <h1>Remove old questions</h1>
