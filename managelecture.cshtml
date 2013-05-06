@@ -165,21 +165,6 @@
                                     <input type="submit" value="Remove">
                                 </form>
                             }
-                            if (admin == true) {
-                                var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture");
-                                if(removeLectures.Count() > 0) {
-                                    <h1>Remove lecture</h1>
-                                    <hr>
-                                    <form method="post" action="?type=remove">
-                                        @{
-                                            foreach(var lecture in removeLectures) {
-                                                <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
-                                            }
-                                        }
-                                        <input type="submit" value="Remove">
-                                    </form>
-                                }
-                            }
                         }
                         <hr>
                         <a href="dashboard.cshtml">Back to dashboard</a>

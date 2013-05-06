@@ -31,7 +31,7 @@
             @{
                 if(Request.QueryString["course"] != null) {
                     var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
-                    var selectedLecture = db.Query("SELECT id, date FROM T_Lecture WHERE course_id = @0", selectedData.id);
+                    var selectedLecture = db.Query("SELECT id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date, DATE_FORMAT(T_Lecture.date, '%d-%m-%Y') AS date2 FROM T_Lecture WHERE course_id = @0", selectedData.id);
                     var grid = new WebGrid(source: selectedLecture, defaultSort: "id", rowsPerPage: 3);
                     <h2>@selectedData.course_id @selectedData.course_name</h2>
                     <p>Lectures:</p>
@@ -39,8 +39,14 @@
                         <p><i>No lectures for selected course...</i></p>
                     }
                     else {
+                        var currentTime = DateTime.Now.ToString("dd-MM-yyyy");
                         foreach(var lecture in selectedLecture) {
-                            <p><a href="?lecture=@lecture.id">@lecture.date</a></p>
+                            if(currentTime.Equals(lecture.date2)) {
+                                <p><a href="?lecture=@lecture.id">@lecture.date</a></p>
+                            }
+                            else {
+                                <p>@lecture.date</p>
+                            }
                         }
                     }
                     <hr>
