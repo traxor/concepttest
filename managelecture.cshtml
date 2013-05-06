@@ -127,36 +127,21 @@
                                 successMessage = "Successfully removed " + Request.Form["removeLecture"] + " from database!";
                             }
                             <p>@successMessage</p>
-                        
-                            if (admin == false) {
-                                var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture WHERE creator_id = @0", Session["id"]);
-                                if(removeLectures.Count() > 0) {
-                                    <h1>Remove lecture</h1>
-                                    <hr>
-                                    <form method="post" action="?type=remove">
-                                        @{
-                                            foreach(var lecture in removeLectures) {
-                                                <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
-                                            }
-                                        }
-                                        <input type="submit" value="Remove">
-                                    </form>
-                                }
-                            }
+                            var removeLectures = db.Query("SELECT T_Lecture.id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE creator_id = @0", Session["id"]);
                             if (admin == true) {
-                                var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture");
-                                if(removeLectures.Count() > 0) {
-                                    <h1>Remove lecture</h1>
-                                    <hr>
-                                    <form method="post" action="?type=remove">
-                                        @{
-                                            foreach(var lecture in removeLectures) {
-                                                <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
-                                            }
+                                removeLectures = db.Query("SELECT T_Lecture.id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture");
+                            }
+                            if(removeLectures.Count() > 0) {
+                                <h1>Remove lecture</h1>
+                                <hr>
+                                <form method="post" action="?type=remove">
+                                    @{
+                                        foreach(var lecture in removeLectures) {
+                                            <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
                                         }
-                                        <input type="submit" value="Remove">
-                                    </form>
-                                }
+                                    }
+                                    <input type="submit" value="Remove">
+                                </form>
                             }
                         }
                         <hr>
