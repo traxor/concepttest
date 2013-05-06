@@ -40,7 +40,7 @@
         );
 
         lectureId = Request.Form["lectures"];
-        lectureOutput = db.QueryValue("SELECT date FROM T_Lecture WHERE id = @0", lectureId);
+        lectureOutput = db.QueryValue("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE id = @0", lectureId);
 
         if(Validation.IsValid()) {
             int count = Int16.Parse(Request.Form["counter"]);
