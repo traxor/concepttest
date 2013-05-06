@@ -27,15 +27,15 @@
     
     if(IsPost && !Request["Submit"].IsEmpty())
     {
-        Validation.RequireField("courses", "You must select a Course");
-        Validation.RequireField("lectures", "You must select a Lecture");
+        Validation.RequireField("courses", "You must select a course");
+        Validation.RequireField("lectures", "You must select a lecture");
 
         Validation.Add("Tags",
             Validator.StringLength(50, 0, "No more than 50 letters")
         );
 
         Validation.Add("Question", 
-            Validator.Required("You must submit a Question"), 
+            Validator.Required("You must submit a question"), 
             Validator.StringLength(50, 0, "No more than 50 letters")
         );
 
@@ -50,7 +50,6 @@
                 Tags = Request.Form["Tags"];
                 bool transactionstatus = true;
 
-                //Vad händer om Session tagit slut när man "submitar" en fråga?
                 db.Execute("START TRANSACTION");
                     db.Execute(addcommand, Question, Tags, (int)(Session["id"]));
                     var id = db.GetLastInsertId();
@@ -186,8 +185,8 @@
 
                         if(IsPost && !Request["addoldquestion"].IsEmpty())
                         {
-                            Validation.RequireField("selectquestion", "You must select a Course");
-                            Validation.RequireField("lecturesoldquestion", "You must select a Lecture");
+                            Validation.RequireField("selectquestion", "You must select a course");
+                            Validation.RequireField("lecturesoldquestion", "You must select a lecture");
                             var control = "SELECT COUNT(*) FROM T_Question_Lecture WHERE question_id = @0 AND lecture_id = @1";
 
                             if(Validation.IsValid()){
@@ -203,7 +202,7 @@
 
                         if(IsPost && !Request["deletequestion"].IsEmpty())
                         {
-                            Validation.RequireField("removequestion", "You must select a Question");
+                            Validation.RequireField("removequestion", "You must select a question");
 
                             if(Validation.IsValid()){
                                 var removeCommand = "DELETE FROM T_Question WHERE T_Question.id = @0";
@@ -234,7 +233,7 @@
                                 </td>
                             <tr>
                                 <td>
-                                    Matching Questions:
+                                    Matching questions:
                                             <select id="oldquestions" name="oldquestions">
                                                 <option value="" disabled>-- Select question --</option>
                                                 @foreach(var matchingquestions in data) {
@@ -305,12 +304,12 @@
                                 </td>
                             <tr>
                                 <td>
-                                    (Only questions created by yourself are visable)
+                                    (Only questions created by yourself are visible)
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    Matching Questions:
+                                    Matching questions:
                                             <select id="removequestion" name="removequestion">
                                                 <option value="">-- Select question --</option>
                                                 @foreach(var matchingquestions in removedata) {

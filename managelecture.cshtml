@@ -10,18 +10,22 @@
     var dateInput = "";
     var passwordInput = "";
     var successMessage = "";
+    bool admin = false;
 
     var db = Database.Open("102547-concepttest");
     var selected = db.Query("SELECT * FROM T_Course");
     if (Session["id"] != null) {
         int userId = (int)(Session["id"]);
+        var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", userId);
+        if (checkIfAdmin != 0) {
+            admin = true;
+        }
     
         if(Request.QueryString["type"] == "add") {
             Validation.RequireField("course_name", "You must select a course");
             Validation.RequireField("date", "You must submit a date");
             Validation.RequireField("password", "You must submit a password");
         }
-        
 
         if(IsPost && Validation.IsValid() && Request.QueryString["type"] == "add") {        
             courseNameInput = Request.Form["course_name"];
@@ -124,19 +128,36 @@
                             }
                             <p>@successMessage</p>
                         
-                            var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture WHERE creator_id = @0", Session["id"]);
-                            if(removeLectures.Count() > 0) {
-                                <h1>Remove lecture</h1>
-                                <hr>
-                                <form method="post" action="?type=remove">
-                                    @{
-                                        foreach(var lecture in removeLectures) {
-                                            <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
+                            if (admin == false) {
+                                var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture WHERE creator_id = @0", Session["id"]);
+                                if(removeLectures.Count() > 0) {
+                                    <h1>Remove lecture</h1>
+                                    <hr>
+                                    <form method="post" action="?type=remove">
+                                        @{
+                                            foreach(var lecture in removeLectures) {
+                                                <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
+                                            }
                                         }
-                                    }
-                                    <input type="submit" value="Remove">
-                                </form>
+                                        <input type="submit" value="Remove">
+                                    </form>
                                 }
+                            }
+                            if (admin == true) {
+                                var removeLectures = db.Query("SELECT T_Lecture.id, T_Lecture.date FROM T_Lecture");
+                                if(removeLectures.Count() > 0) {
+                                    <h1>Remove lecture</h1>
+                                    <hr>
+                                    <form method="post" action="?type=remove">
+                                        @{
+                                            foreach(var lecture in removeLectures) {
+                                                <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
+                                            }
+                                        }
+                                        <input type="submit" value="Remove">
+                                    </form>
+                                }
+                            }
                         }
                         <hr>
                         <a href="dashboard.cshtml">Back to dashboard</a>

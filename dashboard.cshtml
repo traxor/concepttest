@@ -25,7 +25,6 @@
         addQuestionLink = "/managequestion.cshtml";
         statisticsLink = "/statistics.cshtml";
         searchTagsLink = "/searchtags.cshtml";
-        settingsLink  = "/settings.cshtml";
         int userId = (int)(Session["id"]);
         var db = Database.Open("102547-concepttest");
         var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", userId);
@@ -34,6 +33,7 @@
         getName = queryDb.name;
         if (checkIfAdmin != 0) {
             addUserLink = "/adduser.cshtml";
+            settingsLink  = "/settings.cshtml";
             admin = true;
         }
     }
