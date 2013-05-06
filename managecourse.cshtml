@@ -71,93 +71,89 @@
                     <p><a href="managecourse.cshtml">Add another course</a></p>
                 </div>
             }
-             else { 
-                
-                    <div>
-                        <form method="post" action="?type=add">
-                        <h1>Add course</h1>
-                        <hr>
-                        <table class="invisborder">
-                            <tr>
-                                <td align="right">Course ID:</td>
-                                <td><input type="text" name="course_id"/></td>
-                                <td>@Html.ValidationMessage("course_id")</td>
-                            </tr>
-                            <tr>
-                                <td align="right">Course name:</td>
-                                <td><input type="text" name="course_name"/></td>
-                                <td>@Html.ValidationMessage("course_name")</td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td><input type="Submit" name="Submit" value="Submit" /></td>
-                                <td></td>
-                            </tr>
-                        </table>
-                        </form>
-
-                @{
-                    if(IsPost && Request.Form["removeCourse"] != null && Request.QueryString["type"] == "remove") {
-                        var removeCourse = "DELETE FROM T_Course WHERE T_Course.id = @0";
-                        var removeLecturesInCourse = "DELETE FROM T_Lecture WHERE T_Lecture.course_id = @0";
-                        var removeStatisticsForLectureInCourse = "DELETE T_Statistics FROM T_Statistics, T_Lecture WHERE T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = @0";
-                        var removeQuestionLectureKey = "DELETE T_Question_Lecture FROM T_Question_Lecture, T_Lecture WHERE T_Question_Lecture.lecture_id = T_Lecture.id AND T_Lecture.course_id = @0";
-                        var course_id = Request.Form["removeCourse"];
-                        try {
-                            db.Execute("START TRANSACTION");
-                            db.Execute(removeQuestionLectureKey, course_id);
-                            db.Execute(removeStatisticsForLectureInCourse, course_id);
-                            db.Execute(removeLecturesInCourse, course_id);
-                            db.Execute(removeCourse, course_id);
-                            db.Execute("COMMIT");  
-                            successMessage = "Successfully removed " + Request.Form["removeCourse"] + " from database!";
-                        }
-                        catch (Exception e) {
-                            successMessage = "Error: " + e.ToString();
-                        }
-                    }
-                    if(admin == false) {
-                        var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0", Session["id"]);
-                        if(getCourses.Count() > 0) {
-                            <h1>Remove course</h1>
-                            <hr>
-                            <form method="post" action="?type=remove">
-                                @{
-                                    foreach(var course in getCourses) {
-                                        <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
-                                    }
+            else {    
+                <div>
+                    <form method="post" action="?type=add">
+                    <h1>Add course</h1>
+                    <hr>
+                    <table class="invisborder">
+                        <tr>
+                            <td align="right">Course ID:</td>
+                            <td><input type="text" name="course_id"/></td>
+                            <td>@Html.ValidationMessage("course_id")</td>
+                        </tr>
+                        <tr>
+                            <td align="right">Course name:</td>
+                            <td><input type="text" name="course_name"/></td>
+                            <td>@Html.ValidationMessage("course_name")</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><input type="Submit" name="Submit" value="Submit" /></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    </form>
+                        @{
+                            if(IsPost && Request.Form["removeCourse"] != null && Request.QueryString["type"] == "remove") {
+                                var removeCourse = "DELETE FROM T_Course WHERE T_Course.id = @0";
+                                var removeLecturesInCourse = "DELETE FROM T_Lecture WHERE T_Lecture.course_id = @0";
+                                var removeStatisticsForLectureInCourse = "DELETE T_Statistics FROM T_Statistics, T_Lecture WHERE T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = @0";
+                                var removeQuestionLectureKey = "DELETE T_Question_Lecture FROM T_Question_Lecture, T_Lecture WHERE T_Question_Lecture.lecture_id = T_Lecture.id AND T_Lecture.course_id = @0";
+                                var course_id = Request.Form["removeCourse"];
+                                try {
+                                    db.Execute("START TRANSACTION");
+                                    db.Execute(removeQuestionLectureKey, course_id);
+                                    db.Execute(removeStatisticsForLectureInCourse, course_id);
+                                    db.Execute(removeLecturesInCourse, course_id);
+                                    db.Execute(removeCourse, course_id);
+                                    db.Execute("COMMIT");  
+                                    successMessage = "Successfully removed " + Request.Form["removeCourse"] + " from database!";
                                 }
-                                <input type="submit" value="Remove">
-                            </form>
-                            <p>@successMessage</p>
-                        }
-                    }
-                    if(admin == true) {
-                        var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course");
-                        if(getCourses.Count() > 0) {
-                            <h1>Remove course</h1>
-                            <hr>
-                            <form method="post" action="?type=remove">
-                                @{
-                                    foreach(var course in getCourses) {
-                                        <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
-                                    }
+                                catch (Exception e) {
+                                    successMessage = "Error: " + e.ToString();
                                 }
-                                <input type="submit" value="Remove">
-                            </form>
-                            <p>@successMessage</p>
+                            }
+                            if(admin == false) {
+                                var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0", Session["id"]);
+                                if(getCourses.Count() > 0) {
+                                    <h1>Remove course</h1>
+                                    <hr>
+                                    <form method="post" action="?type=remove">
+                                        @{
+                                            foreach(var course in getCourses) {
+                                                <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
+                                            }
+                                        }
+                                        <input type="submit" value="Remove">
+                                    </form>
+                                    <p>@successMessage</p>
+                                }
+                            }
+                            if(admin == true) {
+                                var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course");
+                                if(getCourses.Count() > 0) {
+                                    <h1>Remove course</h1>
+                                    <hr>
+                                    <form method="post" action="?type=remove">
+                                        @{
+                                            foreach(var course in getCourses) {
+                                                <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
+                                            }
+                                        }
+                                        <input type="submit" value="Remove">
+                                    </form>
+                                    <p>@successMessage</p>
+                                }
+                            }
                         }
-                    }
-                }
-            <hr>
-            <p><a href="dashboard.cshtml">Back to dashboard</a></p>
-            </div>
-                
+                    <hr>
+                    <p><a href="dashboard.cshtml">Back to dashboard</a></p>
+                </div>
             }
         }
     </body>
 </html>
-
 
 @{
     if(db!=null) {
