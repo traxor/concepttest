@@ -159,7 +159,9 @@
                                 <form method="post" action="?type=remove">
                                     @{
                                         foreach(var lecture in removeLectures) {
-                                            <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date</p>
+                                            var lectureCourseId = db.QueryValue("SELECT T_Course.course_id FROM T_Course, T_Lecture WHERE T_Lecture.course_id = T_Course.id AND T_Lecture.id = @0", lecture.id);
+                                            var lectureCourse = db.QueryValue("SELECT T_Course.course_name FROM T_Course, T_Lecture WHERE T_Lecture.course_id = T_Course.id AND T_Lecture.id = @0", lecture.id);
+                                            <p><input type="radio" name="removeLecture" value="@lecture.id"> @lecture.date - @lectureCourseId @lectureCourse</p>
                                         }
                                     }
                                     <input type="submit" value="Remove">

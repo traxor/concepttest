@@ -133,7 +133,7 @@
                                     <form method="post" action="?type=remove">
                                         @{
                                             foreach(var user in getUsers) {
-                                                <p><input type="radio" name="removeUser" value="@user.id">@user.name</p>
+                                                <p><input type="radio" name="removeUser" value="@user.id">@user.username - @user.name</p>
                                             }
                                         }
                                         <input type="submit" value="Remove">
