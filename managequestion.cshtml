@@ -18,7 +18,7 @@
     var successMessage = "";
     
     
-    var selectcommand = "SELECT * FROM T_Lecture WHERE course_id = @0 ORDER BY date";
+    var selectcommand = "SELECT T_Lecture.id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE course_id = @0 ORDER BY date";
     var addcommand = "INSERT INTO T_Question (question, tags, creator_id) Values (@0, @1, @2)";
     var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
     var addanswer = "INSERT INTO T_Answer (question_id, answer, correct) Values (@0, @1, @2)";
