@@ -8,6 +8,8 @@
         Response.Redirect("~/login.cshtml");
     }
 
+    var nomatch = "";
+    var nomatch2 = "";
     var Question = "";
     var Tags = "";
     var Answer = "";
@@ -139,7 +141,7 @@
                                 <td align="right">Course:</td>
                                 <td>
                                     <select id="courses" name="courses" onchange="updatelectures()">
-                                        <option value="">-- Please select course --</option>
+                                        <option value="">-- Select course --</option>
                                         @foreach(var choice in selected) {
                                             if(Request.Form["courses"] == choice.id.ToString()) {
                                                 <option value="@choice.id" selected>@choice.course_name</option>
@@ -156,7 +158,9 @@
                                 <td align="right">Lecture:</td>
                                 <td>
                                     <select id="lectures" name="lectures">
-                                        <option value="" disabled>-- Please select lecture --</option>
+                                        @if(!Request.Form["courses"].IsEmpty()){
+                                            <option value="">-- Select lecture --</option>
+                                        }
                                         @foreach(var matchinglectures in selectedlectures) {
                                             <option value="@matchinglectures.id">@matchinglectures.date</option>
                                         }
@@ -177,7 +181,7 @@
                         <p>Number of answers (max 10):<input type="button" name="addanswer" value="+" onclick="addform()" /> <input type="button" name="removeanswer" value="-" onclick="removeform()" /></p>
                         <p id="answerfield"></p>
                         
-                        <p><input type="Submit" name="Submit" value="Submit" /><input type="hidden" id="counter" name="counter" value="0"/></p>            
+                        <p><input type="Submit" name="Submit" id="addquestion" value="Submit" /><input type="hidden" id="counter" name="counter" value="0"/></p>            
                         <p><a href="dashboard.cshtml">Back to dashboard</a></p>
                     </div>
                     @{
@@ -237,25 +241,30 @@
                         <table class="invisborder">
                             <tr>
                                 <td>
-                                        <input type="text" name="searchphrase" value="" />
+                                        <input type="text" name="searchphrase" value="" onkeydown="if (event.keyCode == 13) updatelectures();"/>
                                         <input type="Submit" name="oldquestion" value="Search"/>
                                 </td>
                             <tr>
                                 <td>
                                     Matching questions:
-                                            <select id="oldquestions" name="oldquestions">
-                                                <option value="">-- Please select question --</option>
-                                                @foreach(var matchingquestions in data) {
-                                                    <option value="@matchingquestions.id">@matchingquestions.question</option>
-                                                }
-                                            </select>
+                                    <select id="oldquestions" name="oldquestions">
+                                        @if(0<data.Count()){
+                                            <option value="">-- Select question --</option>
+                                        }else{
+                                            nomatch2 = "Sorry, there were no question matching your search";
+                                        }
+                                        @foreach(var matchingquestions in data) {
+                                            <option value="@matchingquestions.id">@matchingquestions.question</option>
+                                        }
+                                    </select>
                                     @Html.ValidationMessage("oldquestions")
+                                    <p><font color="red">@nomatch2</font></p>    
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <select id="selectquestion" name="selectquestion" onchange="updatelectures()">
-                                                <option value="">-- Please select course --</option>
+                                                <option value="">-- Select course --</option>
                                                 @foreach(var choice in selected) {
                                                     if(Request.Form["selectquestion"] == choice.id.ToString()) {
                                                         <option value="@choice.id" selected>@choice.course_name</option>
@@ -276,7 +285,9 @@
                             <tr>
                                 <td>
                                     <select id="lecturesoldquestion" name="lecturesoldquestion">
-                                                <option value="">-- Please select lecture --</option>
+                                                @if(!Request.Form["selectquestion"].IsEmpty()){
+                                                    <option value="">-- Select lecture --</option>
+                                                }
                                                 @foreach(var matchinglectures in selectedlecturesoldquestion) {
                                                     if(Request.Form["lecturesoldquestion"] == matchinglectures.id.ToString()){
                                                         <option value="@matchinglectures.id" selected>@matchinglectures.date</option>
@@ -318,8 +329,8 @@
                         <table class="invisborder">
                             <tr>
                                 <td>
-                                        <input type="text" name="removesearchphrase" value="" />
-                                        <input type="Submit" name="removeoldquestion" value="Search"/>
+                                    <input type="text" name="removesearchphrase" value="" onkeydown="if (event.keyCode == 13) updatelectures();"/>
+                                    <input type="Submit" name="removeoldquestion" value="Search"/>
                                 </td>
                             <tr>
                                 <td>
@@ -330,12 +341,17 @@
                                 <td>
                                     Matching questions:
                                             <select id="removequestion" name="removequestion">
-                                                <option value="">-- Please select question --</option>
+                                                @if(0<removedata.Count()){
+                                                    <option value="">-- Select question --</option>
+                                                }else{
+                                                    nomatch = "Sorry, there were no question matching your search";
+                                                }
                                                 @foreach(var matchingquestions in removedata) {
                                                     <option value="@matchingquestions.id">@matchingquestions.question</option>
                                                 }
                                             </select>
                                             @Html.ValidationMessage("removequestion")
+                                            <p><font color="red">@nomatch</font></p>
                                 </td>
                             </tr>
                             <tr>

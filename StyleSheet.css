@@ -38,3 +38,6 @@ hr {
 .red {
     color: red;
 }
+select{
+    width: 170px;
+}
