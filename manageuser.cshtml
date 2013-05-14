@@ -32,9 +32,9 @@
         var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", userId);
         if (checkIfAdmin != 0) {
 
-            Validation.RequireField("username", "You must enter a username!");
-            Validation.RequireField("password", "You must enter a password!");
-            Validation.RequireField("name", "You must enter a name!");
+            Validation.RequireField("username", "You must submit a username");
+            Validation.RequireField("password", "You must submit a password");
+            Validation.RequireField("name", "You must submit a name");
 
             if(IsPost && Validation.IsValid()) {
                 usernameInput = Request.Form["username"];
@@ -110,7 +110,7 @@
                             </tr>
                             <tr>
                                 <td></td>
-                                <td><input type="submit" value="Add user"></td>
+                                <td><input type="submit" value="Submit"></td>
                                 <td></td>
                             </tr>
                         </table>
@@ -128,7 +128,7 @@
                                 }
                                 var getUsers = db.Query("SELECT * FROM T_User WHERE T_User.id != @0", Session["id"]);
                                 if(getUsers.Count() > 0) {
-                                    <h1>Remove User</h1>
+                                    <h1>Remove user</h1>
                                     <hr>
                                     <form method="post" action="?type=remove">
                                         @{

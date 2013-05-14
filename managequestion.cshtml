@@ -136,10 +136,10 @@
                         <br>
                         <table class="invisborder">
                             <tr>
-                                <td>Course:</td>
+                                <td align="right">Course:</td>
                                 <td>
                                     <select id="courses" name="courses" onchange="updatelectures()">
-                                        <option value="">-- Select course --</option>
+                                        <option value="">-- Please select course --</option>
                                         @foreach(var choice in selected) {
                                             if(Request.Form["courses"] == choice.id.ToString()) {
                                                 <option value="@choice.id" selected>@choice.course_name</option>
@@ -153,10 +153,10 @@
                                 </td>
                                 </tr>
                             <tr>
-                                <td>Lecture:</td>
+                                <td align="right">Lecture:</td>
                                 <td>
                                     <select id="lectures" name="lectures">
-                                        <option value="" disabled>-- Select lecture --</option>
+                                        <option value="" disabled>-- Please select lecture --</option>
                                         @foreach(var matchinglectures in selectedlectures) {
                                             <option value="@matchinglectures.id">@matchinglectures.date</option>
                                         }
@@ -165,12 +165,12 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Question:</td> 
-                                <td><input type="text" name="Question" size="16"/> @Html.ValidationMessage("Question")</td>
+                                <td align="right">Question:</td> 
+                                <td><input type="text" name="Question" size="23"/> @Html.ValidationMessage("Question")</td>
                             </tr>
                             <tr>
-                                <td>Tags (optional):</td> 
-                                <td><input type="text" name="Tags" size="16" /> @Html.ValidationMessage("Tags")</td>
+                                <td align="right">Tags (optional):</td> 
+                                <td><input type="text" name="Tags" size="23" /> @Html.ValidationMessage("Tags")</td>
                             </tr>
                         </table>
 
@@ -244,7 +244,7 @@
                                 <td>
                                     Matching questions:
                                             <select id="oldquestions" name="oldquestions">
-                                                <option value="">-- Select question --</option>
+                                                <option value="">-- Please select question --</option>
                                                 @foreach(var matchingquestions in data) {
                                                     <option value="@matchingquestions.id">@matchingquestions.question</option>
                                                 }
@@ -255,7 +255,7 @@
                             <tr>
                                 <td>
                                     <select id="selectquestion" name="selectquestion" onchange="updatelectures()">
-                                                <option value="">-- Select course --</option>
+                                                <option value="">-- Please select course --</option>
                                                 @foreach(var choice in selected) {
                                                     if(Request.Form["selectquestion"] == choice.id.ToString()) {
                                                         <option value="@choice.id" selected>@choice.course_name</option>
@@ -276,7 +276,7 @@
                             <tr>
                                 <td>
                                     <select id="lecturesoldquestion" name="lecturesoldquestion">
-                                                <option value="">-- Select lecture --</option>
+                                                <option value="">-- Please select lecture --</option>
                                                 @foreach(var matchinglectures in selectedlecturesoldquestion) {
                                                     if(Request.Form["lecturesoldquestion"] == matchinglectures.id.ToString()){
                                                         <option value="@matchinglectures.id" selected>@matchinglectures.date</option>
@@ -330,7 +330,7 @@
                                 <td>
                                     Matching questions:
                                             <select id="removequestion" name="removequestion">
-                                                <option value="">-- Select question --</option>
+                                                <option value="">-- Please select question --</option>
                                                 @foreach(var matchingquestions in removedata) {
                                                     <option value="@matchingquestions.id">@matchingquestions.question</option>
                                                 }

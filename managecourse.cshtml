@@ -114,37 +114,22 @@
                                     successMessage = "Error: " + e.ToString();
                                 }
                             }
-                            if(admin == false) {
-                                var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0", Session["id"]);
-                                if(getCourses.Count() > 0) {
-                                    <h1>Remove course</h1>
-                                    <hr>
-                                    <form method="post" action="?type=remove">
-                                        @{
-                                            foreach(var course in getCourses) {
-                                                <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
-                                            }
-                                        }
-                                        <input type="submit" value="Remove">
-                                    </form>
-                                    <p>@successMessage</p>
-                                }
-                            }
+                            var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0", Session["id"]);
                             if(admin == true) {
-                                var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course");
-                                if(getCourses.Count() > 0) {
-                                    <h1>Remove course</h1>
-                                    <hr>
-                                    <form method="post" action="?type=remove">
-                                        @{
-                                            foreach(var course in getCourses) {
-                                                <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
-                                            }
+                                getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course");
+                            }
+                            if(getCourses.Count() > 0) {
+                                <h1>Remove course</h1>
+                                <hr>
+                                <form method="post" action="?type=remove">
+                                    @{
+                                        foreach(var course in getCourses) {
+                                            <p><input type="radio" name="removeCourse" value="@course.id">@course.course_id @course.course_name</p>
                                         }
-                                        <input type="submit" value="Remove">
-                                    </form>
-                                    <p>@successMessage</p>
-                                }
+                                    }
+                                    <input type="submit" value="Remove">
+                                </form>
+                                <p>@successMessage</p>
                             }
                         }
                     <hr>

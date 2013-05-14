@@ -26,13 +26,12 @@
     
         if(Request.QueryString["type"] == "add") {
             Validation.RequireField("course_name", "You must select a course");
-            Validation.RequireField("date", "You must submit a date");
             Validation.RequireField("password", "You must submit a password");
             if (regexDate.IsMatch(Request.Form["date"])) {
                 isValid = true;
             }
             else {
-                dateError = "You must submit date like yyyy-mm-dd.";
+                dateError = "You must submit a date like yyyy-mm-dd";
             }
         }
 
@@ -102,7 +101,7 @@
                                 <td align="right">Course name:</td>
                                 <td>
                                 <select id="course_name" name="course_name">
-                                        <option value="">-- Select course --</option>                              
+                                        <option value="">-- Please select course --</option>                              
                                         @foreach(var category in selected) {
                                             if(Request.Form["course_name"] == category.id.ToString()) {
                                                 <option value="@category.id" selected>@category.course_id @category.course_name</option>
@@ -116,13 +115,13 @@
                                 <td>@Html.ValidationMessage("course_name")</td>
                             </tr>
                             <tr>
-                                <td align="right">Date (yyyy-mm-dd):</td>
-                                <td><input type="text" id="datepicker" name="date" size="30" /></td>
-                                <td>@Html.ValidationMessage("date")@dateError</td>
+                                <td align="right">Date:</td>
+                                <td><input type="text" id="datepicker" name="date" size="29" /></td>
+                                <td>@dateError</td>
                             </tr>
                             <tr>
                                 <td align="right">Password:</td>
-                                <td><input type="text" name="password" size="16"/></td>
+                                <td><input type="text" name="password" size="29"/></td>
                                 <td>@Html.ValidationMessage("password")</td>
                             </tr>
                             <tr>
