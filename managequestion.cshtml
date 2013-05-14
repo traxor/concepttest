@@ -196,10 +196,10 @@
                         {
                             Validation.RequireField("selectquestion", "You must select a course");
                             Validation.RequireField("lecturesoldquestion", "You must select a lecture");
+                            Validation.RequireField("oldquestions", "You must select a question");
                             var control = "SELECT COUNT(*) FROM T_Question_Lecture WHERE question_id = @0 AND lecture_id = @1";
 
                             if(Validation.IsValid()){
-
                                 if(0==(int)db.QueryValue(control, Request.Form["oldquestions"], Request.Form["lecturesoldquestion"])){
                                     var addoldquestion = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
                                     db.Execute(addoldquestion, Request.Form["oldquestions"], Request.Form["lecturesoldquestion"]);
@@ -244,11 +244,12 @@
                                 <td>
                                     Matching questions:
                                             <select id="oldquestions" name="oldquestions">
-                                                <option value="" disabled>-- Select question --</option>
+                                                <option value="">-- Select question --</option>
                                                 @foreach(var matchingquestions in data) {
                                                     <option value="@matchingquestions.id">@matchingquestions.question</option>
                                                 }
                                             </select>
+                                    @Html.ValidationMessage("oldquestions")
                                 </td>
                             </tr>
                             <tr>
@@ -265,7 +266,7 @@
                                                 }
                                     </select>
                                     @alreadyused
-                                    @Html.ValidationMessage("selectquestion")
+                                    @Html.ValidationMessage("selectquestion")                                    
                                 </td>
                             </tr>
                             @{
