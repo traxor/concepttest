@@ -114,9 +114,9 @@
                                     successMessage = "Error: " + e.ToString();
                                 }
                             }
-                            var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0", Session["id"]);
+                            var getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course WHERE creator_id = @0 ORDER BY course_id", Session["id"]);
                             if(admin == true) {
-                                getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course");
+                                getCourses = db.Query("SELECT T_Course.id, T_Course.course_id, T_Course.course_name FROM T_Course ORDER BY course_id");
                             }
                             if(getCourses.Count() > 0) {
                                 <h1>Remove course</h1>

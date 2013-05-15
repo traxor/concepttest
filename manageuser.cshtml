@@ -126,7 +126,7 @@
                                         successMessage = "Error: " + e.ToString();
                                     }
                                 }
-                                var getUsers = db.Query("SELECT * FROM T_User WHERE T_User.id != @0", Session["id"]);
+                                var getUsers = db.Query("SELECT * FROM T_User WHERE T_User.id != @0 ORDER BY username", Session["id"]);
                                 if(getUsers.Count() > 0) {
                                     <h1>Remove user</h1>
                                     <hr>
