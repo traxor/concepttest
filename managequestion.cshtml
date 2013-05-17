@@ -241,7 +241,7 @@
                         <table class="invisborder">
                             <tr>
                                 <td>
-                                        <input type="text" name="searchphrase" value="" onkeydown="if (event.keyCode == 13) updatelectures();"/>
+                                        <input type="text" name="searchphrase" value="" onkeydown="if (event.keyCode == 13){ updatelectures(); return false;}"/>
                                         <input type="Submit" name="oldquestion" value="Search"/>
                                 </td>
                             <tr>
@@ -329,7 +329,7 @@
                         <table class="invisborder">
                             <tr>
                                 <td>
-                                    <input type="text" name="removesearchphrase" value="" onkeydown="if (event.keyCode == 13) updatelectures();"/>
+                                    <input type="text" name="removesearchphrase" value="" onkeydown="if (event.keyCode == 13){ updatelectures(); return false;}"/>
                                     <input type="Submit" name="removeoldquestion" value="Search"/>
                                 </td>
                             <tr>
