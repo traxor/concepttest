@@ -19,7 +19,6 @@
     var lectureOutput = "";
     var successMessage = "";
     
-    
     var selectcommand = "SELECT T_Lecture.id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS dateformat FROM T_Lecture WHERE course_id = @0 ORDER BY date";
     var addcommand = "INSERT INTO T_Question (question, tags, creator_id) Values (@0, @1, @2)";
     var addrelation = "INSERT INTO T_Question_Lecture (question_id, lecture_id) Values (@0, @1)";
@@ -34,7 +33,7 @@
             admin = true;
     }
 
-    var selected = db.Query("SELECT * FROM T_Course");
+    var selected = db.Query("SELECT * FROM T_Course ORDER BY course_id");
     
     if(IsPost && !Request["Submit"].IsEmpty())
     {
@@ -144,10 +143,10 @@
                                         <option value="">-- Select course --</option>
                                         @foreach(var choice in selected) {
                                             if(Request.Form["courses"] == choice.id.ToString()) {
-                                                <option value="@choice.id" selected>@choice.course_name</option>
+                                                <option value="@choice.id" selected>@choice.course_id @choice.course_name</option>
                                             }
                                             else {
-                                                <option value="@choice.id">@choice.course_name</option>
+                                                <option value="@choice.id">@choice.course_id @choice.course_name</option>
                                             }
                                         }
                                     </select>
@@ -188,7 +187,7 @@
                         //Some code for the search, add and remove old question section
                         var alreadyused = "";
                         var search = "";
-                        var searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
+                        var searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 ORDER BY question";
 
                         var data = db.Query(searchphrase, "%" + search + "%");
 
@@ -267,10 +266,10 @@
                                                 <option value="">-- Select course --</option>
                                                 @foreach(var choice in selected) {
                                                     if(Request.Form["selectquestion"] == choice.id.ToString()) {
-                                                        <option value="@choice.id" selected>@choice.course_name</option>
+                                                        <option value="@choice.id" selected>@choice.course_id @choice.course_name</option>
                                                     }
                                                     else {
-                                                        <option value="@choice.id">@choice.course_name</option>
+                                                        <option value="@choice.id">@choice.course_id @choice.course_name</option>
                                                     }
                                                 }
                                     </select>
@@ -309,10 +308,10 @@
                     </div>
                     @{
                         search = "";
-                        searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 AND T_Question.creator_id = @1";
+                        searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 AND T_Question.creator_id = @1 ORDER BY question";
 
                         if(admin){
-                            searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0";
+                            searchphrase = "SELECT * FROM T_Question WHERE tags LIKE @0 ORDER BY question";
                         }
 
                         search = Request.Form["removesearchphrase"];

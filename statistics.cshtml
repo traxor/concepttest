@@ -7,8 +7,6 @@
     var redirectLogin = "~/login.cshtml";
     var pageTitle = "Statistics";
     var db = Database.Open("102547-concepttest");
-
-    
 }
 
 <!DOCTYPE html>
@@ -34,7 +32,7 @@
                 if (Session["id"] != null) {
                     if(Request.QueryString["course"] != null) {
                         var selectedData = db.QuerySingle("SELECT id, course_id, course_name FROM T_Course WHERE course_id = @0", Request.QueryString["course"]);
-                        var selectedLecture = db.Query("SELECT id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE course_id = @0", selectedData.id);
+                        var selectedLecture = db.Query("SELECT id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE course_id = @0 ORDER BY YEAR(date), MONTH(date), DAY(date)", selectedData.id);
                         var numberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer, T_Lecture, T_Course WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = true AND T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = T_Course.id AND T_Course.course_id = @0", Request.QueryString["course"]);
                         var numberOfAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Statistics, T_Lecture, T_Course WHERE T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = T_Course.id AND T_Course.course_id = @0", Request.QueryString["course"]);
                         float percent = ((float)numberOfCorrectAnswers/(float)numberOfAnswers)*100;
@@ -61,13 +59,13 @@
                                 <p><a href="?lecture=@lecture.id">@lecture.date</a></p>
                             }
                             <hr>
-                            <p><a href="~/statistics.cshtml">Back to Statistics</a></p>
+                            <p><a href="~/statistics.cshtml">Back to statistics</a></p>
                         }
                     }
                     else if (Request.QueryString["lecture"] != null && Request.QueryString["question"] == null) {
                         var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
                         var lecture = db.QuerySingle("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date, T_Lecture.id FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
-                        var questions = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
+                        var questions = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0 ORDER BY question", Request.QueryString["lecture"]);
                         var numberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = true AND T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
                         var numberOfAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Statistics WHERE T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
                         float percent = ((float)numberOfCorrectAnswers/(float)numberOfAnswers)*100;
@@ -147,7 +145,6 @@
                                         <td>@percent.ToString("#.##")%</td>
                                         </tr>
                                     }
-                                    
                                 }    
                             }
                             else {
@@ -168,7 +165,6 @@
                                         <td>@percent.ToString("#.##")%</td>
                                         </tr>
                                     }
-                                    
                                 }
                             }
                             </table>
@@ -178,7 +174,6 @@
                             }
                             else {
                                 <p><img alt="statistics chart" src="~/chart.cshtml?lecture=@Request.QueryString["lecture"]&question=@Request.QueryString["question"]&type=lectureQuestion" /></p>
-
                             }
                         }
                         <hr>
@@ -225,7 +220,6 @@
                                         <td>@percent.ToString("#.##")%</td>
                                         </tr>
                                     }
-                                    
                                 }    
                             }
                             else {
@@ -246,7 +240,6 @@
                                         <td>@percent.ToString("#.##")%</td>
                                         </tr>
                                     }
-                                    
                                 }
                             }
                             </table>
@@ -262,7 +255,7 @@
                         <p><a href="~/searchtags.cshtml">Back to search questions by tags</a></p>
                     }
                     else if (Request.QueryString["question"] != null && Request.QueryString["type"] == "2") {
-                        var lecturesWithThisQuestion = db.Query("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date, T_Lecture.id FROM T_Lecture, T_Question_Lecture WHERE T_Question_Lecture.question_id = @0 AND T_Question_Lecture.lecture_id = T_Lecture.id", Request.QueryString["question"]);
+                        var lecturesWithThisQuestion = db.Query("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date, T_Lecture.id FROM T_Lecture, T_Question_Lecture WHERE T_Question_Lecture.question_id = @0 AND T_Question_Lecture.lecture_id = T_Lecture.id ORDER BY YEAR(date), MONTH(date), DAY(date)", Request.QueryString["question"]);
                         <form method="post">
                             <table>
                                 <tr>
@@ -287,7 +280,6 @@
                                             else {
                                                 <option value="@lecture.id">@lecture.date</option>
                                             }
-                                            
                                         }
                                     </select>
                                     </td>
@@ -331,7 +323,6 @@
                                     <p><i>No statistics for this question...</i></p>
                                 }
                                 else {
-                                        
                                     <table>
                                         <tr>
                                             <th>@course.course_id @course.course_name - @lecture.date</th>
@@ -357,7 +348,7 @@
                                                                 <td><b>@answer.answer</b></td>
                                                                 <td><b>@answer.count</b></td>
                                                                 <td><b>@percent.ToString("#.##")%</b></td>
-                                                                </tr>  
+                                                                </tr>
                                                             }
                                                             else {
                                                                 <tr>
@@ -366,7 +357,6 @@
                                                                 <td>@percent.ToString("#.##")%</td>
                                                                 </tr>
                                                             }
-                                    
                                                         }    
                                                     }
                                                     else {
@@ -387,7 +377,6 @@
                                                                 <td>@percent.ToString("#.##")%</td>
                                                                 </tr>
                                                             }
-                                    
                                                         }
                                                     }
                                                     </table>
@@ -416,7 +405,6 @@
                                                                 <td>@percent.ToString("#.##")%</td>
                                                                 </tr>
                                                             }
-                                    
                                                         }    
                                                     }
                                                     else {
@@ -437,7 +425,6 @@
                                                                 <td>@percent.ToString("#.##")%</td>
                                                                 </tr>
                                                             }
-                                    
                                                         }
                                                     }
                                         </table>
@@ -450,7 +437,6 @@
                                                 }
                                                 else {
                                                     <p><img alt="statistics chart" src="~/chart.cshtml?lecture=@Request.Form["lecture1"]&question=@Request.QueryString["question"]&type=lectureQuestion" /></p>
-
                                                 }
                                             </td>
                                             <td>
@@ -459,32 +445,28 @@
                                                 }
                                                 else {
                                                     <p><img alt="statistics chart" src="~/chart.cshtml?lecture=@Request.Form["lecture2"]&question=@Request.QueryString["question"]&type=lectureQuestion" /></p>
-
                                                 }
                                             </td>
                                         </tr>
                                     </table>
-                            }
-
+                                }
                             <hr>
                         }
-                        }
+                    }
                     else {
-                        var selectedData = db.Query("SELECT course_id, course_name FROM T_Course");
+                        var selectedData = db.Query("SELECT course_id, course_name FROM T_Course ORDER BY course_id");
                         <h1>Select a course</h1>
                         foreach(var course in selectedData) {
                             <p><a href="?course=@course.course_id">@course.course_id @course.course_name</a></p>
                         }
-                        }
+                        <hr>
                     }
-
+                }
                 else {
                     Response.Redirect(redirectLogin);
                 }
-
-                }
-            <p><a href="~/dashboard.cshtml">Back to Dashboard</a></p>
-            <p><a href="~/logout.cshtml">Log out</a></p>
+            }
+            <p><a href="~/dashboard.cshtml">Back to dashboard</a></p>
         </div>
     </body>
 </html>

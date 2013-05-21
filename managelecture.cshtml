@@ -16,7 +16,7 @@
     bool admin = false;
 
     var db = Database.Open("102547-concepttest");
-    var selected = db.Query("SELECT * FROM T_Course");
+    var selected = db.Query("SELECT * FROM T_Course ORDER BY course_id");
     if (Session["id"] != null) {
         int userId = (int)(Session["id"]);
         var checkIfAdmin = db.QueryValue("SELECT COUNT(*) FROM T_Admin WHERE userid = @0", userId);
@@ -134,20 +134,25 @@
                         
                         @{
                             if(IsPost && Request.Form["removeLecture"] != null && Request.QueryString["type"] == "remove") {
+                                var lectureDate = db.QueryValue("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE T_Lecture.id = @0", Request.Form["removeLecture"]);
+                                var courseId = db.QueryValue("SELECT T_Course.course_id FROM T_Course, T_Lecture WHERE T_Lecture.course_id = T_Course.id AND T_Lecture.id = @0", Request.Form["removeLecture"]);
+                                var courseName = db.QueryValue("SELECT T_Course.course_name FROM T_Course, T_Lecture WHERE T_Lecture.course_id = T_Course.id AND T_Lecture.id = @0", Request.Form["removeLecture"]);
                                 var removeCommand = "DELETE FROM T_Lecture WHERE T_Lecture.id = @0";
                                 var removeRelation = "DELETE FROM T_Question_Lecture WHERE lecture_id = @0";
                                 var removeStatistics = "DELETE FROM T_Statistics WHERE lecture_id = @0";
                                 var lectureId = Request.Form["removeLecture"];
-
-                                db.Execute("START TRANSACTION");
+                                try {
+                                    db.Execute("START TRANSACTION");
                                     db.Execute(removeRelation, lectureId);
                                     db.Execute(removeCommand, lectureId);
                                     db.Execute(removeStatistics, lectureId);
-                                db.Execute("COMMIT");
-
-                                successMessage = "Successfully removed " + Request.Form["removeLecture"] + " from database!";
+                                    db.Execute("COMMIT");
+                                    successMessage = "Successfully removed \"" + lectureDate + " - " + courseId + " " + courseName + "\" from database!";    
+                                }
+                                catch (Exception e) {
+                                    successMessage = "Error: " + e.ToString();
+                                }
                             }
-                            <p>@successMessage</p>
                             var removeLectures = db.Query("SELECT T_Lecture.id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture WHERE creator_id = @0 ORDER BY YEAR(date), MONTH(date), DAY(date)", Session["id"]);
                             if (admin == true) {
                                 removeLectures = db.Query("SELECT T_Lecture.id, DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date FROM T_Lecture ORDER BY YEAR(date), MONTH(date), DAY(date)");
@@ -165,6 +170,7 @@
                                     }
                                     <input type="submit" value="Remove">
                                 </form>
+                                <p>@successMessage</p>
                             }
                         }
                         <hr>

@@ -82,9 +82,9 @@
         @{
             if(IsPost && Validation.IsValid() && isValidUsername) {
                 <div>
-                    <p>username: @usernameInput</p>
-                    <p>password: @passwordInput</p>
-                    <p>name: @nameInput</p>
+                    <p>Username: @usernameInput</p>
+                    <p>Password: @passwordInput</p>
+                    <p>Name: @nameInput</p>
                     <h2>@successMessage</h2>
                     <p><a href="manageuser.cshtml">Add another user</a></p>
                 </div>
@@ -119,11 +119,12 @@
                     </form>
                         @{
                             if(IsPost && Request.Form["removeUser"] != null && Request.QueryString["type"] == "remove") {
+                                var user_name = db.QueryValue("SELECT T_User.username FROM T_User WHERE T_User.id = @0", Request.Form["removeUser"]);
                                 var removeUser = "DELETE FROM T_User WHERE T_User.id = @0";
                                 var username = Request.Form["removeUser"];
                                 try {
                                     db.Execute(removeUser, username);
-                                    successMessage = "Successfully removed " + Request.Form["removeUser"] + " from database!";
+                                    successMessage = "Successfully removed \"" + user_name + "\" from database!";
                                 }
                                 catch (Exception e) {
                                     successMessage = "Error: " + e.ToString();

@@ -96,6 +96,8 @@
                     </form>
                         @{
                             if(IsPost && Request.Form["removeCourse"] != null && Request.QueryString["type"] == "remove") {
+                                var courseId = db.QueryValue("SELECT T_Course.course_id FROM T_Course WHERE T_Course.id = @0", Request.Form["removeCourse"]);
+                                var courseName = db.QueryValue("SELECT T_Course.course_name FROM T_Course WHERE T_Course.id = @0", Request.Form["removeCourse"]);
                                 var removeCourse = "DELETE FROM T_Course WHERE T_Course.id = @0";
                                 var removeLecturesInCourse = "DELETE FROM T_Lecture WHERE T_Lecture.course_id = @0";
                                 var removeStatisticsForLectureInCourse = "DELETE T_Statistics FROM T_Statistics, T_Lecture WHERE T_Statistics.lecture_id = T_Lecture.id AND T_Lecture.course_id = @0";
@@ -107,8 +109,8 @@
                                     db.Execute(removeStatisticsForLectureInCourse, course_id);
                                     db.Execute(removeLecturesInCourse, course_id);
                                     db.Execute(removeCourse, course_id);
-                                    db.Execute("COMMIT");  
-                                    successMessage = "Successfully removed " + Request.Form["removeCourse"] + " from database!";
+                                    db.Execute("COMMIT");
+                                    successMessage = "Successfully removed \"" + courseId + " " + courseName + "\" from database!";
                                 }
                                 catch (Exception e) {
                                     successMessage = "Error: " + e.ToString();
