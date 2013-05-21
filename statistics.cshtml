@@ -44,8 +44,8 @@
                             <p>Result:</p>
                             <table border="1" class="blackborder">
                             <tr>
-                            <th>Correct Answers</th>
-                            <th>Number of Answers</th>
+                            <th>Correct answers</th>
+                            <th>Number of answers</th>
                             <th>Percent correct</th>
                             </tr>
                             <tr>
@@ -65,7 +65,7 @@
                     else if (Request.QueryString["lecture"] != null && Request.QueryString["question"] == null) {
                         var course = db.QuerySingle("SELECT T_Course.course_name, T_Course.course_id FROM T_Course INNER JOIN T_Lecture ON T_Lecture.course_id = T_Course.id WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
                         var lecture = db.QuerySingle("SELECT DATE_FORMAT(T_Lecture.date, '%d %M %Y') AS date, T_Lecture.id FROM T_Lecture WHERE T_Lecture.id = @0", Request.QueryString["lecture"]);
-                        var questions = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0 ORDER BY question", Request.QueryString["lecture"]);
+                        var questions = db.Query("SELECT T_Question.question, T_Question.id FROM T_Question INNER JOIN T_Question_Lecture ON T_Question.id = T_Question_Lecture.question_id WHERE T_Question_Lecture.lecture_id = @0", Request.QueryString["lecture"]);
                         var numberOfCorrectAnswers = db.QueryValue("SELECT COUNT(T_Statistics.id) FROM T_Statistics, T_Answer WHERE T_Statistics.answer_id = T_Answer.id AND T_Answer.correct = true AND T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
                         var numberOfAnswers = db.QueryValue("SELECT COUNT(*) FROM T_Statistics WHERE T_Statistics.lecture_id = @0", Request.QueryString["lecture"]);
                         float percent = ((float)numberOfCorrectAnswers/(float)numberOfAnswers)*100;
@@ -81,8 +81,8 @@
                         <p>Result:</p>
                         <table border="1" class="blackborder">
                         <tr>
-                        <th>Correct Answers</th>
-                        <th>Number of Answers</th>
+                        <th>Correct answers</th>
+                        <th>Number of answers</th>
                         <th>Percent correct</th>
                         </tr>
                         <tr>
@@ -125,7 +125,7 @@
                             <table border="1" class="blackborder">
                             <tr>
                             <th>Answer</th>
-                            <th>Number of Answers</th>
+                            <th>Number of answers</th>
                             <th>Percent</th>
                             </tr>
                             @if (correctAnswers == 1) {
@@ -200,7 +200,7 @@
                             <table border="1" class="blackborder">
                             <tr>
                             <th>Answer</th>
-                            <th>Number of Answers</th>
+                            <th>Number of answers</th>
                             <th>Percent</th>
                             </tr>
                             @if (correctAnswers == 1) {
@@ -337,7 +337,7 @@
                                             <table border="1" class="blackborder">
                                                     <tr>
                                                         <th>Answer</th>
-                                                        <th>Number of Answers</th>
+                                                        <th>Number of answers</th>
                                                         <th>Percent</th>
                                                     </tr>
                                                     @if (correctAnswers == 1) {
@@ -385,7 +385,7 @@
                                             <table border="1" class="blackborder">
                                                     <tr>
                                                     <th>Answer</th>
-                                                    <th>Number of Answers</th>
+                                                    <th>Number of answers</th>
                                                     <th>Percent</th>
                                                     </tr>
                                                     @if (correctAnswers2 == 1) {

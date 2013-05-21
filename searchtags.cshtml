@@ -7,7 +7,7 @@
     var pageTitle = "Search tags";
     var db = Database.Open("102547-concepttest");
     var input = "%" + Request.QueryString["tagsInput"] + "%";
-    var selected = db.Query("SELECT * FROM T_Question WHERE tags like @0", input);
+    var selected = db.Query("SELECT * FROM T_Question WHERE tags like @0 ORDER BY question", input);
  
 }
 
@@ -44,7 +44,7 @@
                 if(Request.QueryString["tagsInput"] != null) {
                     <form method="post" id="Submit">
                     <select name="questions" onchange="updateQuestion()">
-                        <option value="null">-- Select a question --</option>
+                        <option value="null">-- Select question --</option>
                         @foreach(var question in selected) {
                             
                             if(Request.Form["questions"] == question.id.ToString()) {
